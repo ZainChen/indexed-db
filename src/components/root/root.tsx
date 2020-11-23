@@ -1,11 +1,11 @@
 import React, { Component } from 'react';
-import { MenuListDemo } from 'src/components/menuListDemo';
+import { Message } from 'src/components/message';
 
 export class Root extends Component {
     render(): JSX.Element {
         return (
             <div>
-                <MenuListDemo />
+                <Message />
             </div>
         );
     }

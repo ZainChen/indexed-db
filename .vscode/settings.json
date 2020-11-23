@@ -1,0 +1,5 @@
+{
+    // 自动 import 语句中路径的首选样式。non-relative: 根据 jsconfig.json 或 tsconfig.json 中配置的 baseUrl 。
+    "typescript.preferences.importModuleSpecifier": "non-relative"
+    // "editor.mouseWheelZoom": true
+}

@@ -1,0 +1,66 @@
+.zain-message {
+    .zain-message-head {
+        position: relative;
+        height: 60px;
+        background: -webkit-linear-gradient(top, #ffffff, #cccccc);
+        .zain-message-title {
+            position: absolute;
+            width: 100%;
+            line-height: 60px;
+            text-align: center;
+        }
+        .zain-message-search {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            line-height: 60px;
+            z-index: 10;
+        }
+        .zain-message-search:hover {
+            background: #cccccc;
+        }
+        .zain-message-add {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            line-height: 60px;
+            text-align: center;
+            z-index: 10;
+            cursor: pointer;
+            // 禁止文字被鼠标选中 
+            -moz-user-select: -moz-none;
+            -moz-user-select: none; 
+            -o-user-select:none; 
+            -khtml-user-select:none; 
+            -webkit-user-select:none; 
+            -ms-user-select:none; 
+            user-select:none;
+        }
+        .zain-message-add:hover {
+            background: #cccccc;
+        }
+    }
+    .zain-message-content {
+        .zain-message-item {
+            line-height: 40px;
+            span {
+                display: inline-block;
+                text-align: center;
+            }
+            .message-item-id {
+                width: 40px;
+            }
+        }
+        .zain-message-item:hover {
+            background: -webkit-linear-gradient(top, #ced6df, #b6c6d7) !important;
+        }
+        .zain-message-item:nth-child(odd) {
+            background: #eeeeee;
+        }
+        .zain-message-item:nth-child(even) {
+            background: #dddddd;
+        }
+    }
+}

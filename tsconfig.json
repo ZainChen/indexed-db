@@ -1,0 +1,37 @@
+{
+    // 官方说明文档：https://www.tslang.cn/docs/handbook/tsconfig-json.html
+    "compilerOptions": {
+        // 指定ECMAScript目标版本 "ES3"（默认）， "ES5"， "ES6"/ "ES2015"， "ES2016"， "ES2017"或 "ESNext"。注意： "ESNext"最新的生成目标列表为 ES proposed features
+        "target": "ESNext",
+        // 定生成哪个模块系统代码： "None"， "CommonJS"， "AMD"， "System"， "UMD"， "ES6"或 "ES2015"。
+        "module": "CommonJS",
+        // 在表达式和声明上有隐含的 any 类型时报错。
+        "noImplicitAny": true,
+        // 生成相应的 .map文件。
+        "sourceMap": false,
+        // 指定JSX代码生成：“保留”，“反应”或“反应本机”
+        "jsx": "react",
+        // 实现类型系统兼容性。（tsx 文件 import React from 'react'; 需要为 true）
+        "esModuleInterop": true,
+        // 指定模块解析策略：'node'（Node）或'classic'（TypeScript 1.6之前的版本）。
+        "moduleResolution": "node",
+        // 当生成文件时指定行结束符： "crlf"（windows）或 "lf"（unix）。
+        "newLine": "lf",
+        // 指定输入文件的根目录。 用于通过--outDir控制输出目录结构。
+        "rootDir": "./src",
+        // 重定向输出目录。
+        "outDir": "./out",
+        // 解析非相对模块名的基准目录。查看 模块解析文档了解详情(https://www.tslang.cn/docs/handbook/module-resolution.html#base-url)。
+        "baseUrl": ".",
+        // 指定模块的路径，和 baseUrl 有关联，和 webpack 中 resolve.alias 配置一样（webpack 中已配置）
+        "paths": {
+            // 模块导入别名，指定后可以在文件之直接 import * from 'src/*';
+            "src/*": [
+                "./src/*"
+            ],
+            "assets/*": [
+                "./assets/*"
+            ]
+        }
+    }
+}

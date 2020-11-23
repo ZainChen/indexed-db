@@ -70,6 +70,7 @@ export class Message extends Component<MessageProps, MessageState> {
                         onClick={this.handleAddMessage}
                     >添加留言</div>
                 </div>
+                <div className="zain-message-fill">fill</div>
                 <div className="zain-message-content">
                     {
                         this.state.messageDatas &&
@@ -77,10 +78,11 @@ export class Message extends Component<MessageProps, MessageState> {
                             return (
                                 <div className="zain-message-item" key={index}>
                                     <span className="message-item-id">{value.id}</span>
-                                    <span className="message-item-name">{value.name}</span>
+                                    <span className="message-item-name" title={value.name}>{value.name}</span>
                                     <span className="message-item-mail">{value.mail}</span>
-                                    <span className="message-item-content">{value.content}</span>
+                                    <span className="message-item-content" title={value.content}>{value.content}</span>
                                     <span className="message-item-time">{value.time}</span>
+                                    <span className="message-item-editor">编辑</span>
                                     <span className="message-item-delete">删除</span>
                                 </div>
                             )

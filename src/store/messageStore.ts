@@ -80,13 +80,32 @@ export class MessageStore {
     }
 
     /**
-     * 搜索指定留言
+     * 搜索指定留言（只支持单个筛选条件）
      * @param messageFilter 搜索参数
      */
-    public searchOnlyMessageDatas(messageFilter: MessageTable): void {
-        this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'id', 3, (datas: MessageTable[]) => {
-            console.log('zain>>>>>datasdatasdatas', datas);
-        });
+    public searchOnlyMessageDatas(messageFilter: MessageTable, func: (datas: MessageTable[]) => void): void {
+        console.log('messageFilter', messageFilter);
+        if (messageFilter.id) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'id', messageFilter.id, (datas: MessageTable[]) => {
+                func(datas);
+            });
+        } else if (messageFilter.name) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'name', messageFilter.name, (datas: MessageTable[]) => {
+                func(datas);
+            });
+        } else if (messageFilter.mail) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'mail', messageFilter.mail, (datas: MessageTable[]) => {
+                func(datas);
+            });
+        } else if (messageFilter.content) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'content', messageFilter.content, (datas: MessageTable[]) => {
+                func(datas);
+            });
+        } else if (messageFilter.time) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'time', messageFilter.time, (datas: MessageTable[]) => {
+                func(datas);
+            });
+        }
     }
     
 }

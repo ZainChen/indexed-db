@@ -96,6 +96,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="id"
                         value={this.state.id ? this.state.id.toString() : ''}
+                        disabled={(this.state.name || this.state.mail || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeIdEdit(event) }}
                     />
                 </span>
@@ -105,6 +106,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="name"
                         value={this.state.name}
+                        disabled={(this.state.id || this.state.mail || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeNameEdit(event) }}
                     />
                 </span>
@@ -114,6 +116,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="mail"
                         value={this.state.mail}
+                        disabled={(this.state.id || this.state.name || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeMailEdit(event) }}
                     />
                 </span>
@@ -123,6 +126,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="content"
                         value={this.state.content}
+                        disabled={(this.state.id || this.state.name || this.state.mail || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeContentEdit(event) }}
                     />
                 </span>
@@ -132,6 +136,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="time"
                         value={this.state.time}
+                        disabled={(this.state.id || this.state.name || this.state.mail || this.state.content) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeTimeEdit(event) }}
                     />
                 </span>

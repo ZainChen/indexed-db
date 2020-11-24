@@ -93,8 +93,9 @@ export class Message extends Component<MessageProps, MessageState> {
      * @param messageFilter 筛选参数
      */
     handleFilterConfirm(messageFilter: MessageTable): void {
-        this.messageStore.searchOnlyMessageDatas(messageFilter);
-        console.log('zain>>>>>messageFilter', messageFilter);
+        this.messageStore.searchOnlyMessageDatas(messageFilter, (datas: MessageTable[]) => {
+            this.setState({ messageDatas: datas });
+        });
     }
     
     render(): JSX.Element {

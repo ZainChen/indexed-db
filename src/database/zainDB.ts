@@ -107,7 +107,7 @@ export class ZainDB {
                     });
                     for (let j = 0; j < this.objectTables[i].tableIndex.length; j++) {
                         const tableIndexSplit = this.objectTables[i].tableIndex[j].split(',');
-                        if (tableIndexSplit && tableIndexSplit.length > 0) {
+                        if (tableIndexSplit && tableIndexSplit.length > 1) {
                             objectStore.createIndex(this.objectTables[i].tableIndex[j], tableIndexSplit);
                         } else {
                             objectStore.createIndex(this.objectTables[i].tableIndex[j], this.objectTables[i].tableIndex[j]);
@@ -188,6 +188,7 @@ export class ZainDB {
         };
         request.onerror = (event: Event) => {
             console.error('数据读取异常：', event);
+            // 这里预留日志、上报等接入能力
             func([]);
         }
     }
@@ -209,7 +210,6 @@ export class ZainDB {
         const index = objectStore.index(tableIndex);
         const range = IDBKeyRange.only(value);
         const request = index.openCursor(range);
-        // const request = index.openCursor();
         request.onsuccess = (event: Event) => {
             const requestSucces: IDBRequest = event.target as IDBRequest;
             const cursor = requestSucces.result;
@@ -223,6 +223,7 @@ export class ZainDB {
         }
         request.onerror = (event: Event) => {
             console.error('数据搜索异常：', event);
+            // 这里预留日志、上报等接入能力
             func([]);
         }
     }

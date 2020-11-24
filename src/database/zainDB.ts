@@ -194,13 +194,13 @@ export class ZainDB {
     }
 
     /**
-     * 条件搜索指定数据
+     * 条件搜索指定 key 值的数据
      * @param tableName 对象表名
-     * @param tableIndex 对象表的所有属性
-     * @param value 索引值
+     * @param tableIndex 对象表的属性
+     * @param value 待查询的索引值
      * @param func 数据搜索完成后的回调函数，返回所有数据
      */
-    searchOnlyDatas<T>(tableName: string, tableIndex: string, value: any, func: (datas: T[]) => void):void {
+    public searchOnlyDatas<T>(tableName: string, tableIndex: string, value: any, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
             console.log('数据库未打开！');
             return;
@@ -225,6 +225,64 @@ export class ZainDB {
             console.error('数据搜索异常：', event);
             // 这里预留日志、上报等接入能力
             func([]);
+        }
+    }
+
+    /**
+     * 条件查询，嘿嘿，超级强大，支持所有条件类型
+     * @param tableName 对象表名
+     * @param tableIndex 对象表的属性
+     * @param rangeType 条件查询，范围类型枚举
+     * @param value 待查询的索引值
+     * @param func 数据搜索完成后的回调函数，返回所有数据
+     */
+    public searchDatas<T>(tableName: string, tableIndex: string, rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType, func: (datas: T[]) => void): void {
+        if (!this.isOpen) {
+            console.log('数据库未打开！');
+            return;
+        }
+        let datas: T[] = [];
+        const objectStore = this.database.transaction([tableName]).objectStore(tableName);
+        const index = objectStore.index(tableIndex);
+        const range: IDBKeyRange = this.getIDBKeyRange(rangeType, value);
+        const request = index.openCursor(range);
+        request.onsuccess = (event: Event) => {
+            const requestSucces: IDBRequest = event.target as IDBRequest;
+            const cursor = requestSucces.result;
+            if (cursor) {
+                datas.push(cursor.value);
+                cursor.continue();
+            } else {
+                console.log("所有数据搜索完成: ", datas);
+                func(datas);
+            }
+        }
+        request.onerror = (event: Event) => {
+            console.error('数据搜索异常：', event);
+            // 这里预留日志、上报等接入能力
+            func([]);
+        }
+    }
+
+    /**
+     * 通过范围类型枚举，待查询的值，获取特定的查询参数
+     * @param rangeType 范围类型枚举
+     * @param value 待查询的值
+     */
+    getIDBKeyRange(rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType): IDBKeyRange {
+        switch (rangeType) {
+            case RangeTypeEnum.ONLY:
+                const valueOnly = value as OnlyType;
+                return IDBKeyRange.only(valueOnly.value);
+            case RangeTypeEnum.LOWERBOUND:
+                const valueLowerBound = value as LowerBoundType;
+                return IDBKeyRange.lowerBound(valueLowerBound.lower, valueLowerBound.open);
+            case RangeTypeEnum.UPPERBOUND:
+                const valueUpperBound = value as UpperBoundType;
+                return IDBKeyRange.upperBound(valueUpperBound.upper, valueUpperBound.open);
+            case RangeTypeEnum.BOUND:
+                const valueBound = value as BoundType;
+                return IDBKeyRange.bound(valueBound.lower, valueBound.upper, valueBound.lowerOpen, valueBound.upperOpen);
         }
     }
 
@@ -298,4 +356,60 @@ export class ZainObjectTable {
     keyPath?: string | string[] | null;
     /** 主键是否值自动增加 */
     autoIncrement?: boolean;
+}
+
+/**
+ * 条件查询，范围类型枚举
+ */
+export enum RangeTypeEnum {
+    /** 查询固定 key 值数据 */
+    ONLY = 'ONLY',
+    /** 查询所有大于或等于 key 值数据 */
+    LOWERBOUND = 'LOWERBOUND',
+    /** 查询所有小于或等于 key 值数据 */
+    UPPERBOUND = 'UPPERBOUND',
+    /** 查询所有大于或等于且小于或等于 key 值数据 */
+    BOUND = 'BOUND'
+}
+
+/**
+ * 查询固定 key 值数据，参数类型
+ */
+export class OnlyType {
+    /** 准备查询的索引值 */
+    value: any;
+}
+
+/**
+ * 查询所有大于或等于 key 值数据，参数类型
+ */
+export class LowerBoundType {
+    /** 准备查询的最小索引值 */
+    lower: any;
+    /** 查询结果是否包含最小索引值，true|false(不包含|包含)，理解为集合的左开区间 */
+    open?: boolean;
+}
+
+/**
+ * 查询所有小于或等于 key 值数据，参数类型
+ */
+export class UpperBoundType {
+    /** 准备查询的最大索引值 */
+    upper: any;
+    /** 查询结果是否包含最大索引值，true|false(不包含|包含)，理解为集合的右开区间 */
+    open?: boolean;
+}
+
+/**
+ * 查询所有大于或等于且小于或等于 key 值数据，参数类型
+ */
+export class BoundType {
+    /** 准备查询的最小索引值 */
+    lower: any;
+    /** 准备查询的最大索引值 */
+    upper: any;
+    /** 查询结果是否包含最小索引值，true|false(不包含|包含)，理解为集合的左开区间 */
+    lowerOpen?: boolean;
+    /** 查询结果是否包含最大索引值，true|false(不包含|包含)，理解为集合的右开区间 */
+    upperOpen?: boolean;
 }

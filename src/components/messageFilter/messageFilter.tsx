@@ -1,5 +1,6 @@
-import React, { Component, Fragment } from 'react';
-import { MessageTable } from 'src/store/messageStore';
+import React, { Component } from 'react';
+import { RangeTypeEnum } from 'src/database/zainDB';
+import { IdFilterType, MessageFilterType } from 'src/store/messageStore';
 import './messageFilter.less';
 
 interface MessageFilterProps {
@@ -8,12 +9,14 @@ interface MessageFilterProps {
     /** 监听单击重置按钮 */
     onReset: () => void;
     /** 监听确定筛选按钮 */
-    onFilterConfirm: (messageFilter: MessageTable) => void;
+    onFilterConfirm: (messageFilter: MessageFilterType) => void;
 }
 
 interface MessageFilterState {
-    /** 正在编辑的每条留言对应的 id */
-    id: number;
+    /** 标记是否显示 id 条件筛选框 */
+    showIdFilter: boolean;
+    /** id 筛选状态 */
+    idFilter: IdFilterType;
     /** 正在编辑的用户名 */
     name: string;
     /** 正在编辑的邮箱 */
@@ -31,7 +34,8 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
     constructor(props: MessageFilterProps) {
         super(props);
         this.state = {
-            id: null,
+            showIdFilter: false,
+            idFilter: new IdFilterType(),
             name: '',
             mail: '',
             content: '',
@@ -39,10 +43,6 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
         }
         this.handleReset = this.handleReset.bind(this);
         this.handleFilterConfirm = this.handleFilterConfirm.bind(this);
-    }
-
-    onChangeIdEdit(event: React.ChangeEvent<HTMLInputElement>): void {
-        this.setState({ id: parseInt(event.target.value) });
     }
 
     onChangeNameEdit(event: React.ChangeEvent<HTMLInputElement>): void {
@@ -63,7 +63,8 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
 
     handleReset(): void {
         this.setState({
-            id: null,
+            showIdFilter: false,
+            idFilter: new IdFilterType(),
             name: '',
             mail: '',
             content: '',
@@ -75,8 +76,8 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
     }
 
     handleFilterConfirm(): void {
-        const messageFilter: MessageTable = {
-            id: this.state.id,
+        const messageFilter: MessageFilterType = {
+            idFilter: this.state.idFilter,
             name: this.state.name,
             mail: this.state.mail,
             content: this.state.content,
@@ -87,6 +88,112 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
         }
     }
 
+    /**
+     * id 内容显示筛选框，获取焦点触发
+     * @param event 
+     */
+    onIdEditInputFocus(event: React.FocusEvent<HTMLInputElement>): void {
+        this.setState({ showIdFilter: true });
+    }
+
+    /**
+     * 取消 id 筛选设置
+     */
+    handleIdQueryCancel(): void {
+        this.setState({
+            showIdFilter: false,
+            idFilter: new IdFilterType()
+        });
+    }
+
+    /**
+     * 确认 id 筛选设置
+     */
+    handleIdQueryConfirm(): void {
+        this.setState({ showIdFilter: false });
+    }
+
+    /**
+     * 选中固定 id 单选框
+     * @param event 
+     */
+    handleIdOnlyRadio(event: React.ChangeEvent<HTMLInputElement>): void {
+        let newIdFilter = new IdFilterType();
+        newIdFilter.rangeType = RangeTypeEnum.ONLY;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 固定 id 输入
+     * @param event 
+     */
+    handleIdOnlyInput(event: React.ChangeEvent<HTMLInputElement>): void {
+        let newIdFilter = this.state.idFilter;
+        newIdFilter.id = parseInt(event.target.value);
+        newIdFilter.idFilterExpression = event.target.value;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 选中左闭或开间（大于或大于等于 id 范围）单选框
+     * @param open true|false(不包含|包含)，理解为集合的左开或闭区间
+     */
+    handleIdLowerBound(open: boolean): void {
+        let newIdFilter = new IdFilterType();
+        newIdFilter.rangeType = RangeTypeEnum.LOWERBOUND;
+        newIdFilter.lowerIdOpen = open;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 选中左开闭间（大于等于 id 范围）输入
+     * @param event 用来说去输入框的值
+     * @param open true|false(不包含|包含)，理解为集合的左开或闭区间
+     */
+    handleIdLowerBoundInput(event: React.ChangeEvent<HTMLInputElement>): void {
+        let newIdFilter = this.state.idFilter;
+        newIdFilter.lowerId = parseInt(event.target.value);
+        newIdFilter.idFilterExpression = `${this.state.idFilter.lowerIdOpen ? '(' : '['}` + event.target.value + `, ${this.state.idFilter.upperId ? this.state.idFilter.upperId : '~'}${this.state.idFilter.upperIdOpen ? ')' : ']'}`;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 选中右闭或开间（大于或大于等于 id 范围）单选框
+     * @param open true|false(不包含|包含)，理解为集合的右开或闭区间
+     */
+    handleIdUpperBound(open: boolean): void {
+        let newIdFilter = new IdFilterType();
+        newIdFilter.rangeType = RangeTypeEnum.UPPERBOUND;
+        newIdFilter.upperIdOpen = open;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 选中右开闭间（大于等于 id 范围）输入
+     * @param event 用来说去输入框的值
+     * @param open true|false(不包含|包含)，理解为集合的右开或闭区间
+     */
+    handleIdUpperBoundInput(event: React.ChangeEvent<HTMLInputElement>): void {
+        let newIdFilter = this.state.idFilter;
+        newIdFilter.upperId = parseInt(event.target.value);
+        newIdFilter.idFilterExpression = `${this.state.idFilter.lowerIdOpen ? '(' : '['}${this.state.idFilter.lowerId ? this.state.idFilter.lowerId : '~'}, ` + event.target.value + `${this.state.idFilter.upperIdOpen ? ')' : ']'}`;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+    /**
+     * 选中左右闭或开间（大于或大于等于 id 范围）单选框
+     * @param lowerIdOpen true|false(不包含|包含)，理解为集合的左开或闭区间
+     * @param upperIdOpen true|false(不包含|包含)，理解为集合的右开或闭区间
+     */
+    handleIdBound(lowerIdOpen: boolean, upperIdOpen: boolean): void {
+        let newIdFilter = new IdFilterType();
+        newIdFilter.rangeType = RangeTypeEnum.BOUND;
+        newIdFilter.lowerIdOpen = lowerIdOpen;
+        newIdFilter.upperIdOpen = upperIdOpen;
+        this.setState({ idFilter: newIdFilter });
+    }
+
+
     render(): JSX.Element {
         return (
             <div className={`zain-message-filter${this.props.className ? ' '+this.props.className : ''}`}>
@@ -95,10 +202,208 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         className="id-edit-input"
                         type="text"
                         name="id"
-                        value={this.state.id ? this.state.id.toString() : ''}
+                        title={this.state.idFilter.idFilterExpression ? this.state.idFilter.idFilterExpression : ''}
+                        value={this.state.idFilter.idFilterExpression ? this.state.idFilter.idFilterExpression : ''}
                         disabled={(this.state.name || this.state.mail || this.state.content || this.state.time) ? true : false}
-                        onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeIdEdit(event) }}
+                        onChange={() => {}}
+                        onFocus={(event: React.FocusEvent<HTMLInputElement>) => { this.onIdEditInputFocus(event); }}
                     />
+                    {
+                        this.state.showIdFilter &&
+                        <div className="id-condition-query">
+                            <span className="id-query-line id-only">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.ONLY}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdOnlyRadio(event); }}
+                                />
+                                <span>&nbsp;id =&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={this.state.idFilter.id ? this.state.idFilter.id : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdOnlyInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-lower-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.LOWERBOUND && this.state.idFilter.lowerIdOpen === false}
+                                    onChange={() => { this.handleIdLowerBound(false); }}
+                                />
+                                <span>&nbsp;{'id >='}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.LOWERBOUND && this.state.idFilter.lowerIdOpen === false) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                                &nbsp;&nbsp;&nbsp;
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.LOWERBOUND && this.state.idFilter.lowerIdOpen === true}
+                                    onChange={() => { this.handleIdLowerBound(true); }}
+                                />
+                                <span>&nbsp;{'id >'}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.LOWERBOUND && this.state.idFilter.lowerIdOpen === true) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-upper-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.UPPERBOUND && this.state.idFilter.upperIdOpen === false}
+                                    onChange={() => { this.handleIdUpperBound(false); }}
+                                />
+                                <span>&nbsp;{'id <='}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text" name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.UPPERBOUND && this.state.idFilter.upperIdOpen === false) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                                &nbsp;&nbsp;&nbsp;
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.UPPERBOUND && this.state.idFilter.upperIdOpen === true}
+                                    onChange={() => { this.handleIdUpperBound(true); }}
+                                />
+                                <span>&nbsp;{'id <'}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.UPPERBOUND && this.state.idFilter.upperIdOpen === true) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === false}
+                                    onChange={() => { this.handleIdBound(false, false); }}
+                                />&nbsp;
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === false) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                                <span>&nbsp;{'<= id <='}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === false) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === false}
+                                    onChange={() => { this.handleIdBound(true, false); }}
+                                />&nbsp;
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === false) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                                <span>&nbsp;{'< id <='}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === false) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === true}
+                                    onChange={() => { this.handleIdBound(false, true); }}
+                                />&nbsp;
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === true) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                                <span>&nbsp;{'<= id <'}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === false && this.state.idFilter.upperIdOpen === true) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-bound">
+                                <input
+                                    className="id-input-radio"
+                                    type="radio"
+                                    name="boundQuery"
+                                    value="bound"
+                                    checked={this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === true}
+                                    onChange={() => { this.handleIdBound(true, true); }}
+                                />&nbsp;
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.lowerId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === true) ? this.state.idFilter.lowerId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdLowerBoundInput(event); }}
+                                />
+                                <span>&nbsp;{'< id <'}&nbsp;</span>
+                                <input
+                                    className="id-input-text"
+                                    type="text"
+                                    name="idQuery"
+                                    value={(this.state.idFilter.upperId && this.state.idFilter.rangeType === RangeTypeEnum.BOUND && this.state.idFilter.lowerIdOpen === true && this.state.idFilter.upperIdOpen === true) ? this.state.idFilter.upperId : ''}
+                                    onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.handleIdUpperBoundInput(event); }}
+                                />
+                            </span>
+                            <span className="id-query-line id-query-button">
+                                <button className="id-query-cancel" onClick={() => { this.handleIdQueryCancel(); }}>取消</button>
+                                <button className="id-query-confirm" onClick={() => { this.handleIdQueryConfirm(); }}>确定</button>
+                            </span>
+                        </div>
+                    }
                 </span>
                 <span className="message-filter-name">
                     <input
@@ -106,7 +411,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="name"
                         value={this.state.name}
-                        disabled={(this.state.id || this.state.mail || this.state.content || this.state.time) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.mail || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeNameEdit(event) }}
                     />
                 </span>
@@ -116,7 +421,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="mail"
                         value={this.state.mail}
-                        disabled={(this.state.id || this.state.name || this.state.content || this.state.time) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.name || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeMailEdit(event) }}
                     />
                 </span>
@@ -126,7 +431,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="content"
                         value={this.state.content}
-                        disabled={(this.state.id || this.state.name || this.state.mail || this.state.time) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.name || this.state.mail || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeContentEdit(event) }}
                     />
                 </span>
@@ -136,7 +441,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="time"
                         value={this.state.time}
-                        disabled={(this.state.id || this.state.name || this.state.mail || this.state.content) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.name || this.state.mail || this.state.content) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeTimeEdit(event) }}
                     />
                 </span>

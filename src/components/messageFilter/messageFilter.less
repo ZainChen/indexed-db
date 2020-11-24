@@ -8,13 +8,59 @@
         text-align: center;
     }
     .message-filter-id {
+        position: relative;
         width: 50px;
         .id-edit-input {
-            float: left;
+            position: absolute;
+            top: -40px;
+            left: 0px;
             width: 32px;
             height: 38px;
             border-width: 1px;
             padding: 0 8px;
+        }
+        .id-condition-query {
+            position: absolute;
+            top: -40px;
+            left: 50px;
+            width: 230px;
+            background: #aaaaaa;
+            box-shadow: 3px 3px 5px #555555;
+            .id-query-line {
+                width: calc(100% - 16px);
+                text-align: left;
+                padding-left: 16px;
+            }
+            .id-query-line:hover {
+                background: #999999;
+            }
+            .id-input-radio {
+                cursor: pointer;
+            }
+            .id-input-text {
+                width: 20px;
+                padding: 0 4px;
+            }
+            button {
+                width: 60px;
+                line-height: 41px;
+                border-width: 0;
+                cursor: pointer;
+                background: -webkit-linear-gradient(top, #eeeeee, #888);
+            }
+            button:focus {
+                outline: none;
+            }
+            button:hover {
+                background: -webkit-linear-gradient(top, #dddddd, #555555);
+            }
+            .id-query-button {
+                width: calc(100% - 110px);
+                padding-left: 110px;
+            }
+            .id-query-cancel {
+                visibility: hidden;
+            }
         }
     }
     .message-filter-name {

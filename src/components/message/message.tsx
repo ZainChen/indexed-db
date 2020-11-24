@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { manageStore } from 'src';
 import { MessageFilter } from 'src/components/messageFilter';
 import { MessageItem } from 'src/components/messageItem';
-import { MessageStore, MessageTable } from 'src/store/messageStore';
+import { MessageFilterType, MessageStore, MessageTable } from 'src/store/messageStore';
 import './message.less';
 
 interface MessageProps {
@@ -47,7 +47,7 @@ export class Message extends Component<MessageProps, MessageState> {
      * 刷新所有留言数据
      */
     refreshMessageDatas(): void {
-        this.messageStore.onGetMessageDatas((datas: MessageTable[]) => {
+        this.messageStore.getMessageDatas((datas: MessageTable[]) => {
             this.setState({ messageDatas: datas });
         });
     }
@@ -92,8 +92,8 @@ export class Message extends Component<MessageProps, MessageState> {
      * 触发筛选操作
      * @param messageFilter 筛选参数
      */
-    handleFilterConfirm(messageFilter: MessageTable): void {
-        this.messageStore.searchOnlyMessageDatas(messageFilter, (datas: MessageTable[]) => {
+    handleFilterConfirm(messageFilter: MessageFilterType): void {
+        this.messageStore.searchMessageDatas(messageFilter, (datas: MessageTable[]) => {
             this.setState({ messageDatas: datas });
         });
     }
@@ -118,7 +118,7 @@ export class Message extends Component<MessageProps, MessageState> {
                     <MessageFilter
                         className="message-content-filter"
                         onReset={this.handleFilterReset}
-                        onFilterConfirm={(messageFilter: MessageTable) => { this.handleFilterConfirm(messageFilter) }}
+                        onFilterConfirm={(messageFilter: MessageFilterType) => { this.handleFilterConfirm(messageFilter) }}
                     />
                 </div>
                 <div className="zain-message-fill">fill</div>

@@ -1,4 +1,4 @@
-import { ZainDB, ZainObjectTable } from "src/database/zainDB";
+import { BoundType, LowerBoundType, OnlyType, RangeTypeEnum, UpperBoundType, ZainDB, ZainObjectTable } from "src/database/zainDB";
 
 /**
  * 留言板 store
@@ -8,7 +8,7 @@ export class MessageStore {
         this.openMessageDatabase();
     }
 
-    /** IndexedDB存储二次封装库 */
+    /** IndexedDB 存储二次封装库 */
     public zainDB: ZainDB;
 
     /**
@@ -27,7 +27,6 @@ export class MessageStore {
         // messageObjectTables.push(messageObjectTable);
         // 创建留言板数据库
         this.zainDB = new ZainDB('ZainMessage-DB', 1, messageObjectTables);
-
     }
 
     /**
@@ -41,17 +40,19 @@ export class MessageStore {
         });
         // 也可以一次添加多条数据
         // const messageTables: MessageTable[] = [
-        //     { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！', time: new Date().toLocaleString() }
-        //     { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！', time: new Date().toLocaleString() }
+        //     { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！点击编辑，可以设置署名联系邮件和留言内容哦。', time: new Date().toLocaleString() },
+        //     { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！点击编辑，可以设置署名联系邮件和留言内容哦。', time: new Date().toLocaleString() }
         // ];
-        // this.zainDB.add<MessageTable[]>('Message-Table', messageTables);
+        // this.zainDB.add<MessageTable[]>('Message-Table', messageTables, (event: Event) => {
+        //     func(event);
+        // });
     }
 
     /**
-     * 监听获取当前查询到的所有留言数据
+     * 获取当前查询到的所有留言数据
      * @param func 数据查询完成后的回调函数，返回所有数据
      */
-    public onGetMessageDatas(func: (datas: MessageTable[]) => void): void {
+    public getMessageDatas(func: (datas: MessageTable[]) => void): void {
         this.zainDB.readDataAll<MessageTable>('Message-Table', (datas: MessageTable[]) => {
             func(datas);
         });
@@ -80,16 +81,12 @@ export class MessageStore {
     }
 
     /**
-     * 搜索指定留言（只支持单个筛选条件）
+     * 条件搜索留言
      * @param messageFilter 搜索参数
      */
-    public searchOnlyMessageDatas(messageFilter: MessageTable, func: (datas: MessageTable[]) => void): void {
+    public searchMessageDatas(messageFilter: MessageFilterType, func: (datas: MessageTable[]) => void): void {
         console.log('messageFilter', messageFilter);
-        if (messageFilter.id) {
-            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'id', messageFilter.id, (datas: MessageTable[]) => {
-                func(datas);
-            });
-        } else if (messageFilter.name) {
+        if (messageFilter.name) {
             this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'name', messageFilter.name, (datas: MessageTable[]) => {
                 func(datas);
             });
@@ -105,6 +102,41 @@ export class MessageStore {
             this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'time', messageFilter.time, (datas: MessageTable[]) => {
                 func(datas);
             });
+        } else if (messageFilter.idFilter) {
+            // this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'id', messageFilter.id, (datas: MessageTable[]) => {
+            //     func(datas);
+            // });
+            switch (messageFilter.idFilter.rangeType) {
+                case RangeTypeEnum.ONLY:
+                    const only: OnlyType = { value: messageFilter.idFilter.id };
+                    this.zainDB.searchDatas<MessageTable>('Message-Table', 'id', RangeTypeEnum.ONLY, only, (datas: MessageTable[]) => {
+                        func(datas);
+                    });
+                    break;
+                case RangeTypeEnum.LOWERBOUND:
+                    const lowerBound: LowerBoundType = { lower: messageFilter.idFilter.lowerId, open: messageFilter.idFilter.lowerIdOpen };
+                    this.zainDB.searchDatas<MessageTable>('Message-Table', 'id', RangeTypeEnum.LOWERBOUND, lowerBound, (datas: MessageTable[]) => {
+                        func(datas);
+                    });
+                    break;
+                case RangeTypeEnum.UPPERBOUND:
+                    const upperBound: UpperBoundType = { upper: messageFilter.idFilter.upperId, open: messageFilter.idFilter.lowerIdOpen };
+                    this.zainDB.searchDatas<MessageTable>('Message-Table', 'id', RangeTypeEnum.UPPERBOUND, upperBound, (datas: MessageTable[]) => {
+                        func(datas);
+                    });
+                    break;
+                case RangeTypeEnum.BOUND:
+                    const bound: BoundType = {
+                        lower: messageFilter.idFilter.lowerId,
+                        lowerOpen: messageFilter.idFilter.lowerIdOpen,
+                        upper: messageFilter.idFilter.upperId,
+                        upperOpen: messageFilter.idFilter.upperIdOpen
+                    };
+                    this.zainDB.searchDatas<MessageTable>('Message-Table', 'id', RangeTypeEnum.BOUND, bound, (datas: MessageTable[]) => {
+                        func(datas);
+                    });
+                    break;
+            }
         }
     }
     
@@ -116,6 +148,42 @@ export class MessageStore {
 export class MessageTable {
     /** 每条留言对应的 id */
     id?: number;
+    /** 姓名 */
+    name: string;
+    /** 邮箱 */
+    mail: string;
+    /** 内容 */
+    content: string;
+    /** 留言时间 */
+    time: string;
+}
+
+/**
+ * 留言表的 id 筛选类型
+ */
+export class IdFilterType {
+    /** 条件查询，范围类型枚举 */
+    rangeType?: RangeTypeEnum;
+    /** id 筛选表达式 */
+    idFilterExpression?: string;
+    /** 固定 id 值 */
+    id?: number;
+    /** 最小 id 值 */
+    lowerId?: number;
+    /** 是否包含最小 id 值，true|false(不包含|包含)，理解为集合的左开或闭区间 */
+    lowerIdOpen?: boolean;
+    /** 最大 id 值 */
+    upperId?: number;
+    /** 是否包含最大 id 值，true|false(不包含|包含)，理解为集合的左开或闭区间 */
+    upperIdOpen?: boolean;
+}
+
+/**
+ * 留言表筛选确认后，参数返回值类型
+ */
+export class MessageFilterType {
+    /** 留言表的 id 筛选参数 */
+    idFilter: IdFilterType;
     /** 姓名 */
     name: string;
     /** 邮箱 */

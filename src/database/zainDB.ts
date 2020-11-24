@@ -106,7 +106,12 @@ export class ZainDB {
                         autoIncrement: this.objectTables[i].autoIncrement
                     });
                     for (let j = 0; j < this.objectTables[i].tableIndex.length; j++) {
-                        objectStore.createIndex(this.objectTables[i].tableIndex[j], this.objectTables[i].tableIndex[j]);
+                        const tableIndexSplit = this.objectTables[i].tableIndex[j].split(',');
+                        if (tableIndexSplit && tableIndexSplit.length > 0) {
+                            objectStore.createIndex(this.objectTables[i].tableIndex[j], tableIndexSplit);
+                        } else {
+                            objectStore.createIndex(this.objectTables[i].tableIndex[j], this.objectTables[i].tableIndex[j]);
+                        }
                     }
                     console.log('已添加对象表：', this.objectTables[i].tableName);
                 }
@@ -157,11 +162,11 @@ export class ZainDB {
     }
 
     /**
-     * 游标查询，监听获取指定对象表所有数据
+     * 游标查询，监听读取指定对象表所有数据
      * @param tableName 对象表名
      * @param func 数据查询完成后的回调函数，返回所有数据
      */
-    public onGetDataAll<T>(tableName: string, func: (datas: T[]) => void): void {
+    public readDataAll<T>(tableName: string, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
             console.log('数据库未打开！');
             return;
@@ -169,7 +174,7 @@ export class ZainDB {
         let datas: T[] = [];
         const objectStore = this.database.transaction([tableName]).objectStore(tableName);
         const request = objectStore.openCursor();
-        request.onsuccess = (event) => {
+        request.onsuccess = (event: Event) => {
             const requestSucces: IDBRequest = event.target as IDBRequest;
             const cursor = requestSucces.result;
             if (cursor) {
@@ -177,9 +182,49 @@ export class ZainDB {
                 cursor.continue();
             }
             else {
+                console.log("所有数据查询完成: ", datas);
                 func(datas);
             }
         };
+        request.onerror = (event: Event) => {
+            console.error('数据读取异常：', event);
+            func([]);
+        }
+    }
+
+    /**
+     * 条件搜索指定数据
+     * @param tableName 对象表名
+     * @param tableIndex 对象表的所有属性
+     * @param value 索引值
+     * @param func 数据搜索完成后的回调函数，返回所有数据
+     */
+    searchOnlyDatas<T>(tableName: string, tableIndex: string, value: any, func: (datas: T[]) => void):void {
+        if (!this.isOpen) {
+            console.log('数据库未打开！');
+            return;
+        }
+        let datas: T[] = [];
+        const objectStore = this.database.transaction([tableName]).objectStore(tableName);
+        const index = objectStore.index(tableIndex);
+        const range = IDBKeyRange.only(value);
+        const request = index.openCursor(range);
+        // const request = index.openCursor();
+        request.onsuccess = (event: Event) => {
+            const requestSucces: IDBRequest = event.target as IDBRequest;
+            const cursor = requestSucces.result;
+            if (cursor) {
+                datas.push(cursor.value);
+                cursor.continue();
+            } else {
+                console.log("所有数据搜索完成: ", datas);
+                func(datas);
+            }
+        }
+        request.onerror = (event: Event) => {
+            console.error('数据搜索异常：', event);
+            func([]);
+        }
     }
 
     /**

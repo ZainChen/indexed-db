@@ -4,7 +4,7 @@
         position: fixed;
         width: 100%;
         min-width: 750px;
-        height: 100px;
+        height: 140px;
         .zain-message-title {
             position: absolute;
             width: 100%;
@@ -21,7 +21,7 @@
             z-index: 10;
         }
         .zain-message-search:hover {
-            background: #cccccc;
+            background: -webkit-linear-gradient(top, #dddddd, #555555);
         }
         .zain-message-add {
             position: absolute;
@@ -42,7 +42,7 @@
             user-select:none;
         }
         .zain-message-add:hover {
-            background: #cccccc;
+            background: -webkit-linear-gradient(top, #dddddd, #555555);
         }
         .message-content-title {
             position: absolute;
@@ -71,12 +71,17 @@
             .message-item-time {
                 width: 200px;
             }
-            .message-item-modify {
+            .message-item-operation {
                 width: 100px;
             }
         }
+        .message-content-filter {
+            position: absolute;
+            top: 100px;
+            right: 0;
+        }
     }
     .zain-message-fill {
-        height: 100px;
+        height: 140px;
     }
 }

@@ -1,0 +1,77 @@
+.zain-message-filter {
+    width: 100%;
+    height: 40px;
+    line-height: 40px;
+    background: -webkit-linear-gradient(top, #eeeeee, #cccccc);
+    span {
+        display: inline-block;
+        text-align: center;
+    }
+    .message-filter-id {
+        width: 50px;
+        .id-edit-input {
+            float: left;
+            width: 48px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-filter-name {
+        width: 120px;
+        .name-edit-input {
+            float: left;
+            width: 118px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-filter-mail {
+        width: 200px;
+        .mail-edit-input {
+            float: left;
+            width: 198px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-filter-content {
+        width: calc(100% - 670px);
+        .content-edit-input {
+            float: left;
+            width: calc(100% - 2px);
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-filter-time {
+        width: 200px;
+        .time-edit-input {
+            float: left;
+            width: 198px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-filter-reset {
+        float: right;
+        width: 50px;
+    }
+    .message-filter-start {
+        float: right;
+        width: 50px;
+    }
+    .message-filter-reset, .message-filter-start {
+        cursor: pointer;
+        // 禁止文字被鼠标选中 
+        -moz-user-select: -moz-none;
+        -moz-user-select: none; 
+        -o-user-select:none; 
+        -khtml-user-select:none; 
+        -webkit-user-select:none; 
+        -ms-user-select:none; 
+        user-select:none;
+        &:hover {
+            background: -webkit-linear-gradient(top, #dddddd, #555555);
+        }
+    }
+}

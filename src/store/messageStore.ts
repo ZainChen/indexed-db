@@ -52,7 +52,7 @@ export class MessageStore {
      * @param func 数据查询完成后的回调函数，返回所有数据
      */
     public onGetMessageDatas(func: (datas: MessageTable[]) => void): void {
-        this.zainDB.onGetDataAll<MessageTable>('Message-Table', (datas: MessageTable[]) => {
+        this.zainDB.readDataAll<MessageTable>('Message-Table', (datas: MessageTable[]) => {
             func(datas);
         });
     }
@@ -76,6 +76,16 @@ export class MessageStore {
     public updateMessage(data: MessageTable, func: (event: Event) => void): void {
         this.zainDB.updateData<MessageTable>('Message-Table', data, (event: Event) => {
             func(event);
+        });
+    }
+
+    /**
+     * 搜索指定留言
+     * @param messageFilter 搜索参数
+     */
+    public searchOnlyMessageDatas(messageFilter: MessageTable): void {
+        this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'id', 3, (datas: MessageTable[]) => {
+            console.log('zain>>>>>datasdatasdatas', datas);
         });
     }
     

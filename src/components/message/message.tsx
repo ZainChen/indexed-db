@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { manageStore } from 'src';
+import { MessageFilter } from 'src/components/messageFilter';
 import { MessageItem } from 'src/components/messageItem';
 import { MessageStore, MessageTable } from 'src/store/messageStore';
 import './message.less';
@@ -23,6 +24,7 @@ export class Message extends Component<MessageProps, MessageState> {
         }
         this.messageStore = manageStore.messageStore;
         this.handleAddMessage = this.handleAddMessage.bind(this);
+        this.handleFilterReset = this.handleFilterReset.bind(this);
     }
 
     /** 留言板 store */
@@ -47,7 +49,6 @@ export class Message extends Component<MessageProps, MessageState> {
     refreshMessageDatas(): void {
         this.messageStore.onGetMessageDatas((datas: MessageTable[]) => {
             this.setState({ messageDatas: datas });
-            console.log("所有数据查询完成: ", datas);
         });
     }
 
@@ -77,8 +78,23 @@ export class Message extends Component<MessageProps, MessageState> {
     handleEditMessageConfirm(newMessage: MessageTable): void {
         this.messageStore.updateMessage(newMessage, (event: Event) => {
             this.refreshMessageDatas();
-            console.log('zain>>>>>edit, newMessage', newMessage);
         });
+    }
+
+    /**
+     * 触发筛选重置操作
+     */
+    handleFilterReset(): void {
+        this.refreshMessageDatas();
+    }
+
+    /**
+     * 触发筛选操作
+     * @param messageFilter 筛选参数
+     */
+    handleFilterConfirm(messageFilter: MessageTable): void {
+        this.messageStore.searchOnlyMessageDatas(messageFilter);
+        console.log('zain>>>>>messageFilter', messageFilter);
     }
     
     render(): JSX.Element {
@@ -86,7 +102,6 @@ export class Message extends Component<MessageProps, MessageState> {
             <div className="zain-message">
                 <div className="zain-message-head">
                     <div className="zain-message-title">【志银留言板】</div>
-                    {/* <div className="zain-message-search">搜索留言</div> */}
                     <div
                         className="zain-message-add"
                         onClick={this.handleAddMessage}
@@ -97,8 +112,13 @@ export class Message extends Component<MessageProps, MessageState> {
                         <span className="message-item-mail">邮箱</span>
                         <span className="message-item-content">留言内容</span>
                         <span className="message-item-time">留言时间</span>
-                        <span className="message-item-modify">修改</span>
+                        <span className="message-item-operation">操作</span>
                     </div>
+                    <MessageFilter
+                        className="message-content-filter"
+                        onReset={this.handleFilterReset}
+                        onFilterConfirm={(messageFilter: MessageTable) => { this.handleFilterConfirm(messageFilter) }}
+                    />
                 </div>
                 <div className="zain-message-fill">fill</div>
                 <div className="zain-message-content">

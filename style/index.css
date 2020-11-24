@@ -1,3 +1,87 @@
+.zain-message-filter {
+  width: 100%;
+  height: 40px;
+  line-height: 40px;
+  background: -webkit-linear-gradient(top, #eeeeee, #cccccc);
+}
+.zain-message-filter span {
+  display: inline-block;
+  text-align: center;
+}
+.zain-message-filter .message-filter-id {
+  width: 50px;
+}
+.zain-message-filter .message-filter-id .id-edit-input {
+  float: left;
+  width: 32px;
+  height: 38px;
+  border-width: 1px;
+  padding: 0 8px;
+}
+.zain-message-filter .message-filter-name {
+  width: 120px;
+}
+.zain-message-filter .message-filter-name .name-edit-input {
+  float: left;
+  width: 102px;
+  height: 38px;
+  border-width: 1px;
+  padding: 0 8px;
+}
+.zain-message-filter .message-filter-mail {
+  width: 200px;
+}
+.zain-message-filter .message-filter-mail .mail-edit-input {
+  float: left;
+  width: 182px;
+  height: 38px;
+  border-width: 1px;
+  padding: 0 8px;
+}
+.zain-message-filter .message-filter-content {
+  width: calc(100% - 670px);
+}
+.zain-message-filter .message-filter-content .content-edit-input {
+  float: left;
+  width: calc(100% - 18px);
+  height: 38px;
+  border-width: 1px;
+  padding: 0 8px;
+}
+.zain-message-filter .message-filter-time {
+  width: 200px;
+}
+.zain-message-filter .message-filter-time .time-edit-input {
+  float: left;
+  width: 182px;
+  height: 38px;
+  border-width: 1px;
+  padding: 0 8px;
+}
+.zain-message-filter .message-filter-reset {
+  float: right;
+  width: 50px;
+}
+.zain-message-filter .message-filter-start {
+  float: right;
+  width: 50px;
+}
+.zain-message-filter .message-filter-reset,
+.zain-message-filter .message-filter-start {
+  cursor: pointer;
+  -moz-user-select: -moz-none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.zain-message-filter .message-filter-reset:hover,
+.zain-message-filter .message-filter-start:hover {
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
+}
+
 .zain-message-item {
   height: 40px;
   line-height: 40px;
@@ -23,9 +107,10 @@
 }
 .zain-message-item .item-name-edit .name-edit-input {
   float: left;
-  width: 118px;
+  width: 102px;
   height: 38px;
   border-width: 1px;
+  padding: 0 8px;
 }
 .zain-message-item .message-item-mail {
   width: 200px;
@@ -35,9 +120,10 @@
 }
 .zain-message-item .item-mail-edit .mail-edit-input {
   float: left;
-  width: 198px;
+  width: 182px;
   height: 38px;
   border-width: 1px;
+  padding: 0 8px;
 }
 .zain-message-item .message-item-content {
   width: calc(100% - 670px);
@@ -47,9 +133,10 @@
 }
 .zain-message-item .item-content-edit .content-edit-input {
   float: left;
-  width: calc(100% - 2px);
+  width: calc(100% - 18px);
   height: 38px;
   border-width: 1px;
+  padding: 0 8px;
 }
 .zain-message-item .message-item-time {
   width: 200px;
@@ -66,7 +153,7 @@
   user-select: none;
 }
 .zain-message-item .message-item-editor:hover {
-  background: #cccccc;
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
 }
 .zain-message-item .message-item-delete,
 .zain-message-item .message-item-complete {
@@ -82,7 +169,7 @@
 }
 .zain-message-item .message-item-delete:hover,
 .zain-message-item .message-item-complete:hover {
-  background: #cccccc;
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
 }
 .zain-message-item .message-item-complete {
   width: 100px;
@@ -104,7 +191,7 @@
   position: fixed;
   width: 100%;
   min-width: 750px;
-  height: 100px;
+  height: 140px;
 }
 .zain-message .zain-message-head .zain-message-title {
   position: absolute;
@@ -122,7 +209,7 @@
   z-index: 10;
 }
 .zain-message .zain-message-head .zain-message-search:hover {
-  background: #cccccc;
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
 }
 .zain-message .zain-message-head .zain-message-add {
   position: absolute;
@@ -142,7 +229,7 @@
   user-select: none;
 }
 .zain-message .zain-message-head .zain-message-add:hover {
-  background: #cccccc;
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
 }
 .zain-message .zain-message-head .message-content-title {
   position: absolute;
@@ -172,10 +259,15 @@
 .zain-message .zain-message-head .message-content-title .message-item-time {
   width: 200px;
 }
-.zain-message .zain-message-head .message-content-title .message-item-modify {
+.zain-message .zain-message-head .message-content-title .message-item-operation {
   width: 100px;
 }
+.zain-message .zain-message-head .message-content-filter {
+  position: absolute;
+  top: 100px;
+  right: 0;
+}
 .zain-message .zain-message-fill {
-  height: 100px;
+  height: 140px;
 }
 

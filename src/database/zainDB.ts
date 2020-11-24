@@ -39,11 +39,18 @@ export class ZainDB {
      * @param version 数据库版本号
      */
     private open(name: string, version: number): void {
+        if (!this.isBrowserSupport()) {
+            console.error('当前浏览器不支持 indexedDB ！');
+            // 这里预留日志、上报等接入能力
+            return;
+        }
+
         this.requestOpen = indexedDB.open(name, version);
 
         // 监听数据库打开失败
         this.requestOpen.onerror = (event: Event) => {
-            console.log('数据库打开失败：', event);
+            console.error('数据库打开失败：', event);
+            // 这里预留日志、上报等接入能力
         };
 
         // 监听数据库打开成功（第一次打开数据库时，先触发 upgradeneeded 事件）
@@ -61,16 +68,29 @@ export class ZainDB {
     }
 
     /**
+     * 判断当前浏览器是否支持 indexedDB
+     * @return true | false (支持 | 不支持)
+     */
+    isBrowserSupport(): boolean {
+        if (!window.indexedDB) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 监听数据库打开成功（第一次打开数据库时，先触发 upgradeneeded 事件）
      * @param func 数据库打开成功后的回调函数（打开成功后，才能操作数据[增删查改等]）
      */
     public onDatabaseOpenSuccess(func: (event: Event) => void): void {
-        this.requestOpen.onsuccess = (event: Event) => {
-            this.database = this.requestOpen.result;
-            this.isOpen = true;
-            console.log('onsuccess', '数据库打开成功：', event);
-            func(event);
-        };
+        if (this.requestOpen) {
+            this.requestOpen.onsuccess = (event: Event) => {
+                this.database = this.requestOpen.result;
+                this.isOpen = true;
+                console.log('onsuccess', '数据库打开成功：', event);
+                func(event);
+            };
+        }
     }
 
     /**
@@ -114,7 +134,9 @@ export class ZainDB {
 
         // 监听数据添加异常
         transaction.onerror = (event: Event) => {
-            console.log('数据添加异常：', event);
+            console.error('数据添加异常：', event);
+            // 这里预留日志、上报等接入能力
+            func(event);
         };
 
         const objectStore = transaction.objectStore(tableName);
@@ -145,7 +167,7 @@ export class ZainDB {
             return;
         }
         let datas: T[] = [];
-        const objectStore = this.database.transaction(tableName).objectStore(tableName);
+        const objectStore = this.database.transaction([tableName]).objectStore(tableName);
         const request = objectStore.openCursor();
         request.onsuccess = (event) => {
             const requestSucces: IDBRequest = event.target as IDBRequest;
@@ -160,6 +182,61 @@ export class ZainDB {
         };
     }
 
+    /**
+     * 删除指定对象表中，指定主键数据
+     * @param tableName 对象表名
+     * @param keyPath 主键(keyPath)值
+     * @param func 数据库删除完成后的回调函数
+     */
+    public deleteData(tableName: string, keyPath: IDBValidKey | IDBKeyRange, func: (event: Event) => void): void {
+        if (!this.isOpen) {
+            console.log('数据库未打开！');
+            return;
+        }
+        const objectStore = this.database.transaction([tableName], 'readwrite').objectStore(tableName);
+        const request = objectStore.delete(keyPath);
+
+        // 监听数据库删除成功
+        request.onsuccess = (event: Event) => {
+            console.log('数据删除成功：', keyPath, event);
+            func(event);
+        }
+
+        // 监听数据库删除失败
+        request.onerror = (event: Event) => {
+            console.error('数据删除失败：', keyPath, event);
+            // 这里预留日志、上报等接入能力
+            func(event);
+        }
+    }
+
+    /**
+     * 更新指定对象表中，指定数据
+     * @param tableName 对象表名
+     * @param data 准备更新的数据
+     * @param func 数据库更新完成后的回调函数
+     */
+    public updateData<T>(tableName: string, data: T, func: (event: Event) => void): void {
+        if (!this.isOpen) {
+            console.log('数据库未打开！');
+            return;
+        }
+        const objectStore = this.database.transaction([tableName], 'readwrite').objectStore(tableName);
+        const request = objectStore.put(data);
+
+        // 监听数据库更新成功
+        request.onsuccess = (event: Event) => {
+            console.log('数据更新成功：', event);
+            func(event);
+        }
+
+        // 监听数据库更新失败
+        request.onerror = (event: Event) => {
+            console.error('数据更新失败：', event);
+            // 这里预留日志、上报等接入能力
+            func(event);
+        }
+    }
 
 }
 

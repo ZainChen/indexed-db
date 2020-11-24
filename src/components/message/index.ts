@@ -1,4 +1,4 @@
 /**
- * 防止 import 引用组件需要 '*\MenuListDemo\MenuListTest'
+ * 防止 import 引用组件需要 '*\message\message'
  */
 export { Message } from './message';

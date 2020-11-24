@@ -32,10 +32,10 @@ export class MessageStore {
 
     /**
      * 添加留言
-     * @param func — 所有数据完成完成后的回调函数
+     * @param func 所有数据添加完成后的回调函数
      */
     public addMessage(func: (event: Event) => void): void {
-        const messageTables: MessageTable = { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！', time: new Date().toLocaleString() };
+        const messageTables: MessageTable = { name: 'zain', mail: '2384439266@qq.com', content: '嗨，哈喽！点击编辑，可以设置署名联系邮件和留言内容哦。', time: new Date().toLocaleString() };
         this.zainDB.add<MessageTable>('Message-Table', messageTables, (event: Event) => {
             func(event);
         });
@@ -56,6 +56,28 @@ export class MessageStore {
             func(datas);
         });
     }
+
+    /**
+     * 指定主键(id)，删除留言
+     * @param id 每条留言对应的 id
+     * @param func 删除指定数据完成后的回调函数
+     */
+    public deleteMessage(id: number, func: (event: Event) => void): void {
+        this.zainDB.deleteData('Message-Table', id, (event: Event) => {
+            func(event);
+        });
+    }
+
+    /**
+     * 更新指定留言数据
+     * @param data 新的留言数据
+     * @param func 更新指定数据完成后的回调函数
+     */
+    public updateMessage(data: MessageTable, func: (event: Event) => void): void {
+        this.zainDB.updateData<MessageTable>('Message-Table', data, (event: Event) => {
+            func(event);
+        });
+    }
     
 }
 
@@ -64,7 +86,7 @@ export class MessageStore {
  */
 export class MessageTable {
     /** 每条留言对应的 id */
-    id?: string;
+    id?: number;
     /** 姓名 */
     name: string;
     /** 邮箱 */

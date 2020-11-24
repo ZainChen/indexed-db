@@ -1,0 +1,98 @@
+.zain-message-item {
+    height: 40px;
+    line-height: 40px;
+    span {
+        display: inline-block;
+        text-align: center;
+        overflow:hidden; //超出的文本隐藏
+        text-overflow:ellipsis; //溢出用省略号显示
+        white-space:nowrap; //溢出不换行
+    }
+    input:focus {
+        outline: auto #555 1px;
+    }
+    .message-item-id {
+        width: 50px;
+    }
+    .message-item-name {
+        width: 120px;
+    }
+    .item-name-edit {
+        width: 120px;
+        .name-edit-input {
+            float: left;
+            width: 118px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-item-mail {
+        width: 200px;
+    }
+    .item-mail-edit {
+        width: 200px;
+        .mail-edit-input {
+            float: left;
+            width: 198px;
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-item-content {
+        width: calc(100% - 670px);
+    }
+    .item-content-edit {
+        width: calc(100% - 670px);
+        .content-edit-input {
+            float: left;
+            width: calc(100% - 2px);
+            height: 38px;
+            border-width: 1px;
+        }
+    }
+    .message-item-time {
+        width: 200px;
+    }
+    .message-item-editor {
+        width: 50px;
+        cursor: pointer;
+        // 禁止文字被鼠标选中 
+        -moz-user-select: -moz-none;
+        -moz-user-select: none; 
+        -o-user-select:none; 
+        -khtml-user-select:none; 
+        -webkit-user-select:none; 
+        -ms-user-select:none; 
+        user-select:none;
+    }
+    .message-item-editor:hover {
+        background: #cccccc;
+    }
+    .message-item-delete, .message-item-complete {
+        width: 50px;
+        cursor: pointer;
+        // 禁止文字被鼠标选中 
+        -moz-user-select: -moz-none;
+        -moz-user-select: none; 
+        -o-user-select:none; 
+        -khtml-user-select:none; 
+        -webkit-user-select:none; 
+        -ms-user-select:none; 
+        user-select:none;
+    }
+    .message-item-delete:hover, .message-item-complete:hover {
+        background: #cccccc;
+    }
+    .message-item-complete {
+        width: 100px;
+    }
+}
+.zain-message-item:hover {
+    background: -webkit-linear-gradient(top, #ced6df, #b6c6d7) !important;
+}
+.zain-message-item:nth-child(odd) {
+    background: #eeeeee;
+}
+.zain-message-item:nth-child(even) {
+    background: #dddddd;
+}

@@ -113,14 +113,13 @@
             width: 100%;
             min-width: 750px;
             height: 60px;
-            background: #999;
             .zain-log-title {
                 width: 100%;
                 line-height: 30px;
                 text-align: center;
-                background: -webkit-linear-gradient(top, #ffffff, #cccccc);
+                background: linear-gradient(180deg, #F2F8FF 0%, rgba(171, 207, 255, 1) 100%);
             }
-            .zain-log-clear, .zain-log-add {
+            .zain-log-clear {
                 position: absolute;
                 top: 0;
                 right: 0;
@@ -138,11 +137,8 @@
                 -ms-user-select:none; 
                 user-select:none;
             }
-            .zain-log-clear {
-                right: 80px;
-            }
-            .zain-log-clear:hover, .zain-log-add:hover {
-                background: -webkit-linear-gradient(top, #dddddd, #555555);
+            .zain-log-clear:hover {
+                background: -webkit-linear-gradient(top, #ffffff, rgb(45, 115, 206));
             }
             .log-content-title {
                 position: absolute;
@@ -151,7 +147,7 @@
                 width: 100%;
                 height: 30px;
                 line-height: 30px;
-                background: -webkit-linear-gradient(top, #dddddd, #bbbbbb);
+                background: linear-gradient(180deg, #F2F8FF 0%, rgba(171, 207, 255, 0.58) 100%);
                 span {
                     display: inline-block;
                     text-align: center;
@@ -160,13 +156,13 @@
                     width: 50px;
                 }
                 .log-item-from {
-                    width: 100px;
+                    width: 250px;
                 }
                 .log-item-level {
                     width: 50px;
                 }
                 .log-item-msg {
-                    width: calc(100% - 550px);
+                    width: calc(100% - 700px);
                 }
                 .log-item-version {
                     width: 50px;
@@ -178,6 +174,28 @@
                     width: 100px;
                 }
             }
+        }
+        .zain-log-content {
+            height: 200px;
+            overflow-y: auto;
+        }
+		.zain-log-content::-webkit-scrollbar {
+            width: 8px;
+        }
+        .zain-log-content::-webkit-scrollbar-thumb {
+			border-radius: 4px;
+            background: rgba(171, 207, 255, 0.58);
+		}
+		.zain-log-content::-webkit-scrollbar-track {
+			border-radius: 4px;
+		}
+        .zain-log-content::-webkit-scrollbar-button:start {
+			width: 0;
+			height: 0;
+        }
+        .zain-log-content::-webkit-scrollbar-button:end {
+			width: 0;
+			height: 0;
         }
     }
 }

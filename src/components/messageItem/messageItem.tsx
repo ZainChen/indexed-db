@@ -24,7 +24,7 @@ interface MessageItemState {
 }
 
 /**
- * 留言板没条留言项组件
+ * 留言板每条留言项组件
  */
 export class MessageItem extends Component<MessageItemProps, MessageItemState> {
     constructor(props: MessageItemProps) {

@@ -1,0 +1,56 @@
+.zain-log-item {
+    height: 30px;
+    line-height: 30px;
+    span {
+        display: inline-block;
+        text-align: center;
+        overflow:hidden; //超出的文本隐藏
+        text-overflow:ellipsis; //溢出用省略号显示
+        white-space:nowrap; //溢出不换行
+    }
+    input:focus {
+        outline: auto #555 1px;
+    }
+    .log-item-id {
+        width: 50px;
+    }
+    .log-item-from {
+        width: 250px;
+    }
+    .log-item-level {
+        width: 50px;
+    }
+    .log-item-msg {
+        width: calc(100% - 700px);
+    }
+    .log-item-version {
+        width: 50px;
+    }
+    .log-item-time {
+        width: 200px;
+    }
+    .log-item-delete {
+        width: 100px;
+        cursor: pointer;
+        // 禁止文字被鼠标选中 
+        -moz-user-select: -moz-none;
+        -moz-user-select: none; 
+        -o-user-select:none; 
+        -khtml-user-select:none; 
+        -webkit-user-select:none; 
+        -ms-user-select:none; 
+        user-select:none;
+    }
+    .log-item-delete:hover {
+        background: -webkit-linear-gradient(top, #ffffff, rgb(45, 115, 206));
+    }
+}
+.zain-log-item:hover {
+    background: -webkit-linear-gradient(top, rgb(215, 232, 255), rgb(147, 186, 236)) !important;
+}
+.zain-log-item:nth-child(odd) {
+    background: rgba(171, 207, 255, 0.1);
+}
+.zain-log-item:nth-child(even) {
+    background: rgba(171, 207, 255, 0.3);
+}

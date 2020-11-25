@@ -435,7 +435,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="name"
                         value={this.state.name}
-                        disabled={(this.state.idFilter.idFilterExpression || this.state.mail || this.state.content || this.state.time) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeNameEdit(event) }}
                     />
                 </span>
@@ -445,7 +445,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         type="text"
                         name="mail"
                         value={this.state.mail}
-                        disabled={(this.state.idFilter.idFilterExpression || this.state.name || this.state.content || this.state.time) ? true : false}
+                        disabled={(this.state.idFilter.idFilterExpression || this.state.content || this.state.time) ? true : false}
                         onChange={(event: React.ChangeEvent<HTMLInputElement>) => { this.onChangeMailEdit(event) }}
                     />
                 </span>

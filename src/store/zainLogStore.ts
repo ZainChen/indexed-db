@@ -27,7 +27,7 @@ export class ZainLogStore {
      * @param zainLog 上报的日志内容
      * @param func 所有数据添加完成后的回调函数
      */
-    public addZainLog(zainLog: ZainLogTable, func: (event: Event) => void): void {
+    public addZainLog(zainLog: ZainLogTable, func?: (event: Event) => void): void {
         const zainLogTable: ZainLogTable = {
             from: zainLog.from,
             level: zainLog.level,
@@ -36,7 +36,9 @@ export class ZainLogStore {
             time: new Date().toLocaleString()
         };
         this.zainDB.add<ZainLogTable>('ZainLog-Table', zainLogTable, (event: Event) => {
-            func(event);
+            if (func) {
+                func(event);
+            }
         });
     }
 

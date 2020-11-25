@@ -17,7 +17,7 @@ export class MessageStore {
     private openMessageDatabase(): void {
         // 留言板数据库的对象表（这里只创建一个，可创建多个表）
         const messageObjectTables: ZainObjectTable[] = [
-            { tableName: 'Message-Table', tableIndex: ['id', 'name', 'mail', 'content', 'time'], keyPath: 'id',  autoIncrement: true}
+            { tableName: 'Message-Table', tableIndex: ['id', 'name', 'mail', 'content', 'time', 'name,mail'], keyPath: 'id',  autoIncrement: true}
         ];
         // let messageObjectTable = new ZainObjectTable();
         // messageObjectTable.tableName = 'Message-Table';
@@ -96,7 +96,11 @@ export class MessageStore {
      */
     public searchMessageDatas(messageFilter: MessageFilterType, func: (datas: MessageTable[]) => void): void {
         console.log('messageFilter', messageFilter);
-        if (messageFilter.name) {
+        if (messageFilter.name && messageFilter.mail) {
+            this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'name,mail', [messageFilter.name, messageFilter.mail], (datas: MessageTable[]) => {
+                func(datas);
+            });
+        } else if (messageFilter.name) {
             this.zainDB.searchOnlyDatas<MessageTable>('Message-Table', 'name', messageFilter.name, (datas: MessageTable[]) => {
                 func(datas);
             });

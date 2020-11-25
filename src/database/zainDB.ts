@@ -1,4 +1,4 @@
-import { ZainLogStore } from "src/store/zainLogStore";
+import { ZainLogStore, ZainLogTable } from "src/store/zainLogStore";
 
 /**
  * IndexedDB存储二次封装库
@@ -49,8 +49,14 @@ export class ZainDB {
      */
     private open(name: string, version: number): void {
         if (!this.isBrowserSupport()) {
+            this.addZainLog('['+this.name+']_'+this.version, 6, '当前浏览器不支持 indexedDB ！');
             console.error('当前浏览器不支持 indexedDB ！');
             // 这里预留日志、上报等接入能力
+            return;
+        }
+        if (!(name && version)) {
+            this.addZainLog('['+this.name+']_'+this.version, 3, '需完善打开数据库参数！');
+            console.log('需完善打开数据库参数！');
             return;
         }
 
@@ -62,8 +68,10 @@ export class ZainDB {
             if (this.openErrorCount <= 3) {
                 // 数据库连续打开失败次数小于等于3次，重新建立连接
                 this.requestOpen = indexedDB.open(name, version);
+                this.addZainLog('['+this.name+']_'+this.version, 6, `数据库打开失败，已是失败（${this.openErrorCount}）次，重新建立连接！`);
                 console.log(`数据库打开失败，已是失败（${this.openErrorCount}）次，重新建立连接：`, event);
             } else {
+                this.addZainLog('['+this.name+']_'+this.version, 9, '数据库连续超过3次打开打开失败，不再重连！');
                 console.error('数据库连续超过3次打开打开失败，不再重连：', event);
             }
             // 这里预留日志、上报等接入能力
@@ -71,11 +79,13 @@ export class ZainDB {
 
         // 监听数据库打开成功（第一次打开数据库时，先触发 upgradeneeded 事件）
         this.onDatabaseOpenSuccess((event: Event) => {
-            console.log('onsuccess', '数据库打开成功：', event);
+            // this.addZainLog(1, '数据库打开成功.');
+            // console.log('onsuccess', '数据库打开成功：', event);
         });
 
         // 监听数据库版本号升级（指定的版本号，大于数据库的实际版本号，触发该事件）
         this.requestOpen.onupgradeneeded = (event: IDBVersionChangeEvent) => {
+            this.addZainLog('['+this.name+']_'+this.version, 5, '数据库版本号升级成功！');
             console.log('onupgradeneeded', '数据库版本号升级成功：', event);
             const target = event.target as IDBOpenDBRequest;
             this.database = target.result;
@@ -101,10 +111,13 @@ export class ZainDB {
     public onDatabaseOpenSuccess(func: (event: Event) => void): void {
         if (this.requestOpen) {
             this.requestOpen.onsuccess = (event: Event) => {
-                this.database = this.requestOpen.result;
+                // this.database = this.requestOpen.result;  // 用这个方法多个地方同时打开一个库有问题
+                const request: IDBOpenDBRequest = event.target as IDBOpenDBRequest;
+                this.database = request.result;
                 this.isOpen = true;
                 this.openErrorCount = 0;
-                console.log('onsuccess', '数据库打开成功：', event);
+                this.addZainLog('['+this.name+']_'+this.version, 5, '数据库打开成功！');
+                console.log('onsuccess', '数据库打开成功：', '['+this.name+']_'+this.version);
                 func(event);
             };
         }
@@ -130,6 +143,7 @@ export class ZainDB {
                             objectStore.createIndex(this.objectTables[i].tableIndex[j], this.objectTables[i].tableIndex[j]);
                         }
                     }
+                    this.addZainLog('['+this.name+']('+this.objectTables[i].tableName+')_'+this.version, 1, '已添加对象表'+this.objectTables[i].tableName);
                     console.log('已添加对象表：', this.objectTables[i].tableName);
                 }
             }
@@ -145,24 +159,27 @@ export class ZainDB {
     public add<T>(tableName: string, datas: T, func: (event: Event) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName && datas)) {
-            console.log('需完善 readDataAll 参数！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善 add 参数！');
+            console.log('需完善 add 参数！');
             return;
         }
         const transaction = this.database.transaction([tableName], 'readwrite');
         // 监听所有数据添加完毕
         transaction.oncomplete = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '所有数据添加完毕.');
             console.log('所有数据添加完毕：', event);
             func(event);
         };
 
         // 监听数据添加异常
         transaction.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据添加异常.');
             console.error('数据添加异常：', event);
-            // 这里预留日志、上报等接入能力
             func(event);
         };
 
@@ -172,13 +189,15 @@ export class ZainDB {
             for (let i = 0; i < datas.length; i++) {
                 const request = objectStore.add(datas[i]);
                 request.onsuccess = (event: Event) => {
-                    console.log('当前数据添加成功：', event);
+                    this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '当前数据添加成功.');
+                    console.log('当前数据添加成功：', datas[i]);
                 };
             }
         } else {
             const request = objectStore.add(datas);
             request.onsuccess = (event: Event) => {
-                console.log('当前数据添加成功：', event);
+                this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '当前数据添加成功.');
+                console.log('当前数据添加成功：', datas);
             };
         }
     }
@@ -191,10 +210,12 @@ export class ZainDB {
     public readDataAll<T>(tableName: string, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善 readDataAll 参数！');
             console.log('需完善 readDataAll 参数！');
             return;
         }
@@ -209,13 +230,14 @@ export class ZainDB {
                 cursor.continue();
             }
             else {
+                this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '所有数据查询完成！');
                 console.log("所有数据查询完成: ", datas);
                 func(datas);
             }
         };
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据读取异常！');
             console.error('数据读取异常：', event);
-            // 这里预留日志、上报等接入能力
             func([]);
         }
     }
@@ -230,10 +252,12 @@ export class ZainDB {
     public searchOnlyDatas<T>(tableName: string, tableIndex: string, value: any, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName && tableIndex && value)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善条件查询参数！');
             console.log('需完善条件查询参数！');
             return;
         }
@@ -249,13 +273,14 @@ export class ZainDB {
                 datas.push(cursor.value);
                 cursor.continue();
             } else {
+                this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '所有数据搜索完成！');
                 console.log("所有数据搜索完成: ", datas);
                 func(datas);
             }
         }
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据搜索异常！');
             console.error('数据搜索异常：', event);
-            // 这里预留日志、上报等接入能力
             func([]);
         }
     }
@@ -271,10 +296,12 @@ export class ZainDB {
     public searchDatas<T>(tableName: string, tableIndex: string, rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName && tableIndex && rangeType && value)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善条件查询参数！');
             console.log('需完善条件查询参数！');
             return;
         }
@@ -290,11 +317,13 @@ export class ZainDB {
                 datas.push(cursor.value);
                 cursor.continue();
             } else {
+                this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '所有数据搜索完成！');
                 console.log("所有数据搜索完成: ", datas);
                 func(datas);
             }
         }
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据搜索异常！');
             console.error('数据搜索异常：', event);
             // 这里预留日志、上报等接入能力
             func([]);
@@ -308,6 +337,7 @@ export class ZainDB {
      */
     private getIDBKeyRange(rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType): IDBKeyRange | undefined {
         if (!(rangeType && value)) {
+            this.addZainLog('['+this.name+']_'+this.version, 3, '需完善 getIDBKeyRange 参数！');
             console.log('需完善 getIDBKeyRange 参数！');
             return;
         }
@@ -336,10 +366,12 @@ export class ZainDB {
     public deleteData(tableName: string, keyPath: IDBValidKey | IDBKeyRange, func: (event: Event) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName && keyPath)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善 deleteData 参数！');
             console.log('需完善 deleteData 参数！');
             return;
         }
@@ -348,12 +380,14 @@ export class ZainDB {
 
         // 监听数据库删除成功
         request.onsuccess = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '数据删除成功！');
             console.log('数据删除成功：', keyPath, event);
             func(event);
         }
 
         // 监听数据库删除失败
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据删除失败！');
             console.error('数据删除失败：', keyPath, event);
             // 这里预留日志、上报等接入能力
             func(event);
@@ -368,10 +402,12 @@ export class ZainDB {
     public clearTableData(tableName: string, func: (event: Event) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善 clearTableData 参数！');
             console.log('需完善 clearTableData 参数！');
             return;
         }
@@ -380,12 +416,14 @@ export class ZainDB {
 
         // 监听数据库清空成功
         request.onsuccess = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '数据清空成功！');
             console.log('数据清空成功：', event);
             func(event);
         }
 
         // 监听数据库清空失败
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据清空失败！');
             console.error('数据清空失败：', event);
             // 这里预留日志、上报等接入能力
             func(event);
@@ -401,10 +439,12 @@ export class ZainDB {
     public updateData<T>(tableName: string, data: T, func: (event: Event) => void): void {
         if (!this.isOpen) {
             this.requestOpen = indexedDB.open(this.name, this.version);
-            console.log('数据库未打开，尝试重新打开数据库！');
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 5, '数据库未打开，尝试重新打开数据库！');
+            console.log('['+this.name+']('+tableName+')_'+this.version+':'+'数据库未打开，尝试重新打开数据库！');
             return;
         }
         if (!(tableName && data)) {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 3, '需完善 updateData 参数！');
             console.log('需完善 updateData 参数！');
             return;
         }
@@ -413,12 +453,14 @@ export class ZainDB {
 
         // 监听数据库更新成功
         request.onsuccess = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 1, '数据更新成功！');
             console.log('数据更新成功：', event);
             func(event);
         }
 
         // 监听数据库更新失败
         request.onerror = (event: Event) => {
+            this.addZainLog('['+this.name+']('+tableName+')_'+this.version, 4, '数据更新失败！');
             console.error('数据更新失败：', event);
             // 这里预留日志、上报等接入能力
             func(event);
@@ -435,8 +477,20 @@ export class ZainDB {
         }
     }
 
-    private addZainLog(): void {
-
+    /**
+     * 添加日志
+     * @param from 日志来源
+     * @param level 日志等级
+     * @param msg 日志信息
+     */
+    private addZainLog(from: string, level: number, msg: string): void {
+        if (!(level && msg)) {
+            console.log('需完善 addZainLog 参数！');
+            return;
+        }
+        if (this.zainLogStore) {
+            this.zainLogStore.addZainLog(new ZainLogTable(from, level, msg));
+        }
     }
 
 }

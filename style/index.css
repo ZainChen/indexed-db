@@ -1,3 +1,59 @@
+.zain-log-item {
+  height: 30px;
+  line-height: 30px;
+}
+.zain-log-item span {
+  display: inline-block;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.zain-log-item input:focus {
+  outline: auto #555 1px;
+}
+.zain-log-item .log-item-id {
+  width: 50px;
+}
+.zain-log-item .log-item-from {
+  width: 250px;
+}
+.zain-log-item .log-item-level {
+  width: 50px;
+}
+.zain-log-item .log-item-msg {
+  width: calc(100% - 700px);
+}
+.zain-log-item .log-item-version {
+  width: 50px;
+}
+.zain-log-item .log-item-time {
+  width: 200px;
+}
+.zain-log-item .log-item-delete {
+  width: 100px;
+  cursor: pointer;
+  -moz-user-select: -moz-none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.zain-log-item .log-item-delete:hover {
+  background: -webkit-linear-gradient(top, #ffffff, #2d73ce);
+}
+.zain-log-item:hover {
+  background: -webkit-linear-gradient(top, #d7e8ff, #93baec) !important;
+}
+.zain-log-item:nth-child(odd) {
+  background: rgba(171, 207, 255, 0.1);
+}
+.zain-log-item:nth-child(even) {
+  background: rgba(171, 207, 255, 0.3);
+}
+
 .zain-message-filter {
   width: 100%;
   height: 40px;
@@ -9,14 +65,66 @@
   text-align: center;
 }
 .zain-message-filter .message-filter-id {
+  position: relative;
   width: 50px;
 }
 .zain-message-filter .message-filter-id .id-edit-input {
-  float: left;
+  position: absolute;
+  top: -40px;
+  left: 0px;
   width: 32px;
   height: 38px;
   border-width: 1px;
   padding: 0 8px;
+}
+.zain-message-filter .message-filter-id .id-condition-query {
+  position: absolute;
+  top: -40px;
+  left: 50px;
+  width: 230px;
+  background: #aaaaaa;
+  box-shadow: 3px 3px 5px #555555;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-query-line {
+  width: calc(100% - 16px);
+  text-align: left;
+  padding-left: 16px;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-query-line:hover {
+  background: #999999;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-input-radio {
+  cursor: pointer;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-input-text {
+  width: 20px;
+  padding: 0 4px;
+}
+.zain-message-filter .message-filter-id .id-condition-query button {
+  width: 60px;
+  line-height: 41px;
+  border-width: 0;
+  cursor: pointer;
+  background: -webkit-linear-gradient(top, #eeeeee, #888);
+}
+.zain-message-filter .message-filter-id .id-condition-query button:focus {
+  outline: none;
+}
+.zain-message-filter .message-filter-id .id-condition-query button:hover {
+  background: -webkit-linear-gradient(top, #dddddd, #555555);
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-query-button {
+  position: relative;
+  width: calc(100% - 110px);
+  padding-left: 110px;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-query-button .query-prompt-text {
+  position: absolute;
+  left: 8px;
+  font-size: 10px;
+}
+.zain-message-filter .message-filter-id .id-condition-query .id-query-cancel {
+  visibility: hidden;
 }
 .zain-message-filter .message-filter-name {
   width: 120px;
@@ -184,34 +292,27 @@
   background: #dddddd;
 }
 
-.zain-message {
+.zain-indexed-db .zain-message {
+  position: absolute;
+  top: 0;
+  bottom: 260px;
+  left: 0;
+  right: 0;
   min-width: 750px;
 }
-.zain-message .zain-message-head {
-  position: fixed;
+.zain-indexed-db .zain-message .zain-message-head {
   width: 100%;
   min-width: 750px;
   height: 140px;
 }
-.zain-message .zain-message-head .zain-message-title {
-  position: absolute;
+.zain-indexed-db .zain-message .zain-message-head .zain-message-title {
   width: 100%;
   line-height: 60px;
   text-align: center;
   background: -webkit-linear-gradient(top, #ffffff, #cccccc);
 }
-.zain-message .zain-message-head .zain-message-search {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 200px;
-  line-height: 60px;
-  z-index: 10;
-}
-.zain-message .zain-message-head .zain-message-search:hover {
-  background: -webkit-linear-gradient(top, #dddddd, #555555);
-}
-.zain-message .zain-message-head .zain-message-add {
+.zain-indexed-db .zain-message .zain-message-head .zain-message-clear,
+.zain-indexed-db .zain-message .zain-message-head .zain-message-add {
   position: absolute;
   top: 0;
   right: 0;
@@ -228,10 +329,14 @@
   -ms-user-select: none;
   user-select: none;
 }
-.zain-message .zain-message-head .zain-message-add:hover {
+.zain-indexed-db .zain-message .zain-message-head .zain-message-clear {
+  right: 80px;
+}
+.zain-indexed-db .zain-message .zain-message-head .zain-message-clear:hover,
+.zain-indexed-db .zain-message .zain-message-head .zain-message-add:hover {
   background: -webkit-linear-gradient(top, #dddddd, #555555);
 }
-.zain-message .zain-message-head .message-content-title {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title {
   position: absolute;
   top: 60px;
   right: 0;
@@ -240,34 +345,151 @@
   line-height: 40px;
   background: -webkit-linear-gradient(top, #dddddd, #bbbbbb);
 }
-.zain-message .zain-message-head .message-content-title span {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title span {
   display: inline-block;
   text-align: center;
 }
-.zain-message .zain-message-head .message-content-title .message-item-id {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-id {
   width: 50px;
 }
-.zain-message .zain-message-head .message-content-title .message-item-name {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-name {
   width: 120px;
 }
-.zain-message .zain-message-head .message-content-title .message-item-mail {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-mail {
   width: 200px;
 }
-.zain-message .zain-message-head .message-content-title .message-item-content {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-content {
   width: calc(100% - 670px);
 }
-.zain-message .zain-message-head .message-content-title .message-item-time {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-time {
   width: 200px;
 }
-.zain-message .zain-message-head .message-content-title .message-item-operation {
+.zain-indexed-db .zain-message .zain-message-head .message-content-title .message-item-operation {
   width: 100px;
 }
-.zain-message .zain-message-head .message-content-filter {
+.zain-indexed-db .zain-message .zain-message-head .message-content-filter {
   position: absolute;
   top: 100px;
   right: 0;
 }
-.zain-message .zain-message-fill {
-  height: 140px;
+.zain-indexed-db .zain-message .zain-message-content {
+  height: calc(100% - 140px);
+  overflow-y: auto;
+  background: #F7FBFF;
 }
+.zain-indexed-db .zain-message .zain-message-content::-webkit-scrollbar {
+  width: 8px;
+}
+.zain-indexed-db .zain-message .zain-message-content::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: #555555;
+}
+.zain-indexed-db .zain-message .zain-message-content::-webkit-scrollbar-track {
+  border-radius: 4px;
+}
+.zain-indexed-db .zain-message .zain-message-content::-webkit-scrollbar-button:start {
+  width: 0;
+  height: 0;
+}
+.zain-indexed-db .zain-message .zain-message-content::-webkit-scrollbar-button:end {
+  width: 0;
+  height: 0;
+}
+.zain-indexed-db .zain-log {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 260px;
+  font-size: 12px;
+  background: #F7FBFF;
+}
+.zain-indexed-db .zain-log .zain-log-head {
+  width: 100%;
+  min-width: 750px;
+  height: 60px;
+}
+.zain-indexed-db .zain-log .zain-log-head .zain-log-title {
+  width: 100%;
+  line-height: 30px;
+  text-align: center;
+  background: linear-gradient(180deg, #F2F8FF 0%, #abcfff 100%);
+}
+.zain-indexed-db .zain-log .zain-log-head .zain-log-clear {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 80px;
+  line-height: 30px;
+  text-align: center;
+  z-index: 10;
+  cursor: pointer;
+  -moz-user-select: -moz-none;
+  -moz-user-select: none;
+  -o-user-select: none;
+  -khtml-user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.zain-indexed-db .zain-log .zain-log-head .zain-log-clear:hover {
+  background: -webkit-linear-gradient(top, #ffffff, #2d73ce);
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title {
+  position: absolute;
+  top: 30px;
+  right: 0;
+  width: 100%;
+  height: 30px;
+  line-height: 30px;
+  background: linear-gradient(180deg, #F2F8FF 0%, rgba(171, 207, 255, 0.58) 100%);
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title span {
+  display: inline-block;
+  text-align: center;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-id {
+  width: 50px;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-from {
+  width: 250px;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-level {
+  width: 50px;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-msg {
+  width: calc(100% - 700px);
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-version {
+  width: 50px;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-time {
+  width: 200px;
+}
+.zain-indexed-db .zain-log .zain-log-head .log-content-title .log-item-operation {
+  width: 100px;
+}
+.zain-indexed-db .zain-log .zain-log-content {
+  height: 200px;
+  overflow-y: auto;
+}
+.zain-indexed-db .zain-log .zain-log-content::-webkit-scrollbar {
+  width: 8px;
+}
+.zain-indexed-db .zain-log .zain-log-content::-webkit-scrollbar-thumb {
+  border-radius: 4px;
+  background: rgba(171, 207, 255, 0.58);
+}
+.zain-indexed-db .zain-log .zain-log-content::-webkit-scrollbar-track {
+  border-radius: 4px;
+}
+.zain-indexed-db .zain-log .zain-log-content::-webkit-scrollbar-button:start {
+  width: 0;
+  height: 0;
+}
+.zain-indexed-db .zain-log .zain-log-content::-webkit-scrollbar-button:end {
+  width: 0;
+  height: 0;
+}
+
 

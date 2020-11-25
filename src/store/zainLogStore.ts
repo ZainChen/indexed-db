@@ -103,6 +103,6 @@ export class ZainLogTable {
     msg: string;
     /** 日志版本（上报日志的时候日志可以不填写，日志管理 store 里处理） */
     version?: string;
-    /** 留言时间（上报日志的时候日志可以不填写，日志管理 store 里处理） */
+    /** 日志产生时间（上报日志的时候日志可以不填写，日志管理 store 里处理） */
     time?: string;
 }

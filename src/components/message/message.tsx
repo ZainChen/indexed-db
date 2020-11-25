@@ -110,46 +110,69 @@ export class Message extends Component<MessageProps, MessageState> {
     
     render(): JSX.Element {
         return (
-            <div className="zain-message">
-                <div className="zain-message-head">
-                    <div className="zain-message-title">【志银留言板】</div>
-                    <div
-                        className="zain-message-clear"
-                        onClick={this.handleClearMessage}
-                    >清空留言</div>
-                    <div
-                        className="zain-message-add"
-                        onClick={this.handleAddMessage}
-                    >添加留言</div>
-                    <div className="message-content-title">
-                        <span className="message-item-id">id</span>
-                        <span className="message-item-name">姓名</span>
-                        <span className="message-item-mail">邮箱</span>
-                        <span className="message-item-content">留言内容</span>
-                        <span className="message-item-time">留言时间</span>
-                        <span className="message-item-operation">操作</span>
+            <div className="zain-indexed-db">
+                <div className="zain-message">
+                    <div className="zain-message-head">
+                        <div className="zain-message-title">【志银留言板】</div>
+                        <div
+                            className="zain-message-clear"
+                            onClick={this.handleClearMessage}
+                        >清空留言</div>
+                        <div
+                            className="zain-message-add"
+                            onClick={this.handleAddMessage}
+                        >添加留言</div>
+                        <div className="message-content-title">
+                            <span className="message-item-id">id</span>
+                            <span className="message-item-name">姓名</span>
+                            <span className="message-item-mail">邮箱</span>
+                            <span className="message-item-content">留言内容</span>
+                            <span className="message-item-time">留言时间</span>
+                            <span className="message-item-operation">操作</span>
+                        </div>
+                        <MessageFilter
+                            className="message-content-filter"
+                            onReset={this.handleFilterReset}
+                            onFilterConfirm={(messageFilter: MessageFilterType) => { this.handleFilterConfirm(messageFilter) }}
+                        />
                     </div>
-                    <MessageFilter
-                        className="message-content-filter"
-                        onReset={this.handleFilterReset}
-                        onFilterConfirm={(messageFilter: MessageFilterType) => { this.handleFilterConfirm(messageFilter) }}
-                    />
+                    <div className="zain-message-content">
+                        {
+                            this.state.messageDatas &&
+                            this.state.messageDatas.map((value: MessageTable, index: number, array: MessageTable[]) => {
+                                return (
+                                    <MessageItem
+                                        key={index}
+                                        message={value}
+                                        onClickDelete={(id: number) => { this.handleDeleteMessage(id) }}
+                                        onEditConfirm={(newMessage: MessageTable) => { this.handleEditMessageConfirm(newMessage) }}
+                                    />
+                                )
+                            })
+                        }
+                    </div>
                 </div>
-                <div className="zain-message-fill">fill</div>
-                <div className="zain-message-content">
-                    {
-                        this.state.messageDatas &&
-                        this.state.messageDatas.map((value: MessageTable, index: number, array: MessageTable[]) => {
-                            return (
-                                <MessageItem
-                                    key={index}
-                                    message={value}
-                                    onClickDelete={(id: number) => { this.handleDeleteMessage(id) }}
-                                    onEditConfirm={(newMessage: MessageTable) => { this.handleEditMessageConfirm(newMessage) }}
-                                />
-                            )
-                        })
-                    }
+                <div className="zain-log">
+                    <div className="zain-log-head">
+                        <div className="zain-log-title">【志银日志】</div>
+                        <div
+                            className="zain-log-clear"
+                            onClick={this.handleClearMessage}
+                        >清空日志</div>
+                        <div
+                            className="zain-log-add"
+                            onClick={this.handleAddMessage}
+                        >添加日志</div>
+                        <div className="log-content-title">
+                            <span className="log-item-id">id</span>
+                            <span className="log-item-from">日志来源</span>
+                            <span className="log-item-level">日志等级</span>
+                            <span className="log-item-msg">日志信息</span>
+                            <span className="log-item-version">日志版本</span>
+                            <span className="log-item-time">日志时间</span>
+                            <span className="log-item-operation">操作</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         );

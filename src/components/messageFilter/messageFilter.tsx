@@ -45,22 +45,41 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
         this.handleFilterConfirm = this.handleFilterConfirm.bind(this);
     }
 
+    /**
+     * 监听姓名筛选项编辑
+     * @param event 
+     */
     onChangeNameEdit(event: React.ChangeEvent<HTMLInputElement>): void {
         this.setState({ name: event.target.value });
     }
 
+    /**
+     * 监听邮件筛选项编辑
+     * @param event 
+     */
     onChangeMailEdit(event: React.ChangeEvent<HTMLInputElement>): void {
         this.setState({ mail: event.target.value });
     }
 
+    /**
+     * 监听内容筛选项编辑
+     * @param event 
+     */
     onChangeContentEdit(event: React.ChangeEvent<HTMLInputElement>): void {
         this.setState({ content: event.target.value });
     }
 
+    /**
+     * 监听时间筛选项编辑
+     * @param event 
+     */
     onChangeTimeEdit(event: React.ChangeEvent<HTMLInputElement>): void {
         this.setState({ time: event.target.value });
     }
 
+    /**
+     * 触发所有筛选参数重置
+     */
     handleReset(): void {
         this.setState({
             showIdFilter: false,
@@ -75,6 +94,9 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
         }
     }
 
+    /**
+     * 触发筛选确认提交功能
+     */
     handleFilterConfirm(): void {
         const messageFilter: MessageFilterType = {
             idFilter: this.state.idFilter,
@@ -202,6 +224,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                         className="id-edit-input"
                         type="text"
                         name="id"
+                        autoComplete="off"
                         title={this.state.idFilter.idFilterExpression ? this.state.idFilter.idFilterExpression : ''}
                         value={this.state.idFilter.idFilterExpression ? this.state.idFilter.idFilterExpression : ''}
                         disabled={(this.state.name || this.state.mail || this.state.content || this.state.time) ? true : false}
@@ -399,6 +422,7 @@ export class MessageFilter extends Component<MessageFilterProps, MessageFilterSt
                                 />
                             </span>
                             <span className="id-query-line id-query-button">
+                                <span className="query-prompt-text">先选中单选框再输入值哦^_^</span>
                                 <button className="id-query-cancel" onClick={() => { this.handleIdQueryCancel(); }}>取消</button>
                                 <button className="id-query-confirm" onClick={() => { this.handleIdQueryConfirm(); }}>确定</button>
                             </span>

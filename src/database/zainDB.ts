@@ -1,3 +1,5 @@
+import { ZainLogStore } from "src/store/zainLogStore";
+
 /**
  * IndexedDB存储二次封装库
  */
@@ -12,8 +14,12 @@ export class ZainDB {
         this.name = name;
         this.version = version;
         this.objectTables = objectTables;
+        this.zainLogStore = this.getZainLogStore();
         this.open(name, version);
     }
+
+    /** 志银版日志记录和上报; 离线日志管理，上报到 indexedDB */
+    public zainLogStore: ZainLogStore;
 
     /** 数据库名 */
     private name: string;
@@ -33,6 +39,9 @@ export class ZainDB {
     /** 标记数据库是否是已打开状态 */
     private isOpen: boolean = false;
 
+    /** 记录数据库连续打开失败次数，连续打开失败超过三次，不再重连 */
+    private openErrorCount: number = 0;
+
     /**
      * 创建或打开数据库
      * @param name 数据库名
@@ -49,7 +58,14 @@ export class ZainDB {
 
         // 监听数据库打开失败
         this.requestOpen.onerror = (event: Event) => {
-            console.error('数据库打开失败：', event);
+            this.openErrorCount++;
+            if (this.openErrorCount <= 3) {
+                // 数据库连续打开失败次数小于等于3次，重新建立连接
+                this.requestOpen = indexedDB.open(name, version);
+                console.log(`数据库打开失败，已是失败（${this.openErrorCount}）次，重新建立连接：`, event);
+            } else {
+                console.error('数据库连续超过3次打开打开失败，不再重连：', event);
+            }
             // 这里预留日志、上报等接入能力
         };
 
@@ -71,7 +87,7 @@ export class ZainDB {
      * 判断当前浏览器是否支持 indexedDB
      * @return true | false (支持 | 不支持)
      */
-    isBrowserSupport(): boolean {
+    private isBrowserSupport(): boolean {
         if (!window.indexedDB) {
             return false;
         }
@@ -87,6 +103,7 @@ export class ZainDB {
             this.requestOpen.onsuccess = (event: Event) => {
                 this.database = this.requestOpen.result;
                 this.isOpen = true;
+                this.openErrorCount = 0;
                 console.log('onsuccess', '数据库打开成功：', event);
                 func(event);
             };
@@ -127,7 +144,12 @@ export class ZainDB {
      */
     public add<T>(tableName: string, datas: T, func: (event: Event) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName && datas)) {
+            console.log('需完善 readDataAll 参数！');
             return;
         }
         const transaction = this.database.transaction([tableName], 'readwrite');
@@ -168,7 +190,12 @@ export class ZainDB {
      */
     public readDataAll<T>(tableName: string, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName)) {
+            console.log('需完善 readDataAll 参数！');
             return;
         }
         let datas: T[] = [];
@@ -202,7 +229,12 @@ export class ZainDB {
      */
     public searchOnlyDatas<T>(tableName: string, tableIndex: string, value: any, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName && tableIndex && value)) {
+            console.log('需完善条件查询参数！');
             return;
         }
         let datas: T[] = [];
@@ -233,19 +265,24 @@ export class ZainDB {
      * @param tableName 对象表名
      * @param tableIndex 对象表的属性
      * @param rangeType 条件查询，范围类型枚举
-     * @param value 待查询的索引值
+     * @param value 待查询的索引值（类型对应 rangeType 条件查询，范围类型枚举）
      * @param func 数据搜索完成后的回调函数，返回所有数据
      */
     public searchDatas<T>(tableName: string, tableIndex: string, rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType, func: (datas: T[]) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName && tableIndex && rangeType && value)) {
+            console.log('需完善条件查询参数！');
             return;
         }
         let datas: T[] = [];
         const objectStore = this.database.transaction([tableName]).objectStore(tableName);
         const index = objectStore.index(tableIndex);
         const range: IDBKeyRange = this.getIDBKeyRange(rangeType, value);
-        const request = index.openCursor(range);
+        const request = range ? index.openCursor(range) : index.openCursor();
         request.onsuccess = (event: Event) => {
             const requestSucces: IDBRequest = event.target as IDBRequest;
             const cursor = requestSucces.result;
@@ -269,20 +306,24 @@ export class ZainDB {
      * @param rangeType 范围类型枚举
      * @param value 待查询的值
      */
-    getIDBKeyRange(rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType): IDBKeyRange {
+    private getIDBKeyRange(rangeType: RangeTypeEnum, value: OnlyType | LowerBoundType | UpperBoundType | BoundType): IDBKeyRange | undefined {
+        if (!(rangeType && value)) {
+            console.log('需完善 getIDBKeyRange 参数！');
+            return;
+        }
         switch (rangeType) {
             case RangeTypeEnum.ONLY:
                 const valueOnly = value as OnlyType;
-                return IDBKeyRange.only(valueOnly.value);
+                return (valueOnly && valueOnly.value) ? IDBKeyRange.only(valueOnly.value) : undefined;
             case RangeTypeEnum.LOWERBOUND:
                 const valueLowerBound = value as LowerBoundType;
-                return IDBKeyRange.lowerBound(valueLowerBound.lower, valueLowerBound.open);
+                return (valueLowerBound && valueLowerBound.lower) ? IDBKeyRange.lowerBound(valueLowerBound.lower, valueLowerBound.open) : undefined;
             case RangeTypeEnum.UPPERBOUND:
                 const valueUpperBound = value as UpperBoundType;
-                return IDBKeyRange.upperBound(valueUpperBound.upper, valueUpperBound.open);
+                return (valueUpperBound && valueUpperBound.upper) ? IDBKeyRange.upperBound(valueUpperBound.upper, valueUpperBound.open) : undefined;
             case RangeTypeEnum.BOUND:
                 const valueBound = value as BoundType;
-                return IDBKeyRange.bound(valueBound.lower, valueBound.upper, valueBound.lowerOpen, valueBound.upperOpen);
+                return (valueBound && valueBound.lower && valueBound.upper) ? IDBKeyRange.bound(valueBound.lower, valueBound.upper, valueBound.lowerOpen, valueBound.upperOpen) : undefined;
         }
     }
 
@@ -294,7 +335,12 @@ export class ZainDB {
      */
     public deleteData(tableName: string, keyPath: IDBValidKey | IDBKeyRange, func: (event: Event) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName && keyPath)) {
+            console.log('需完善 deleteData 参数！');
             return;
         }
         const objectStore = this.database.transaction([tableName], 'readwrite').objectStore(tableName);
@@ -315,6 +361,38 @@ export class ZainDB {
     }
 
     /**
+     * 清空指定表中所有数据
+     * @param tableName 对象表名
+     * @param func 数据表清空完成后的回调函数
+     */
+    public clearTableData(tableName: string, func: (event: Event) => void): void {
+        if (!this.isOpen) {
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName)) {
+            console.log('需完善 clearTableData 参数！');
+            return;
+        }
+        const objectStore = this.database.transaction([tableName], 'readwrite').objectStore(tableName);
+        const request = objectStore.clear();
+
+        // 监听数据库清空成功
+        request.onsuccess = (event: Event) => {
+            console.log('数据清空成功：', event);
+            func(event);
+        }
+
+        // 监听数据库清空失败
+        request.onerror = (event: Event) => {
+            console.error('数据清空失败：', event);
+            // 这里预留日志、上报等接入能力
+            func(event);
+        }
+    }
+
+    /**
      * 更新指定对象表中，指定数据
      * @param tableName 对象表名
      * @param data 准备更新的数据
@@ -322,7 +400,12 @@ export class ZainDB {
      */
     public updateData<T>(tableName: string, data: T, func: (event: Event) => void): void {
         if (!this.isOpen) {
-            console.log('数据库未打开！');
+            this.requestOpen = indexedDB.open(this.name, this.version);
+            console.log('数据库未打开，尝试重新打开数据库！');
+            return;
+        }
+        if (!(tableName && data)) {
+            console.log('需完善 updateData 参数！');
             return;
         }
         const objectStore = this.database.transaction([tableName], 'readwrite').objectStore(tableName);
@@ -340,6 +423,20 @@ export class ZainDB {
             // 这里预留日志、上报等接入能力
             func(event);
         }
+    }
+
+    /**
+     * 获取志银日志 store
+     */
+    private getZainLogStore(): ZainLogStore {
+        // 日志系统自身不记录日志（不做限制会递归，暂时没想到啥解决方案）
+        if (this.name !== 'ZainLog-DB') {
+            return new ZainLogStore();
+        }
+    }
+
+    private addZainLog(): void {
+
     }
 
 }

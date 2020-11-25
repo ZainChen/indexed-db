@@ -30,6 +30,16 @@ export class MessageStore {
     }
 
     /**
+     * 清空指定表中所有留言
+     * @param func 清空完成后的回调函数
+     */
+    public clearMessage(func: (event: Event) => void): void {
+        this.zainDB.clearTableData('Message-Table', (event: Event) => {
+            func(event);
+        });
+    }
+
+    /**
      * 添加留言
      * @param func 所有数据添加完成后的回调函数
      */
@@ -120,7 +130,7 @@ export class MessageStore {
                     });
                     break;
                 case RangeTypeEnum.UPPERBOUND:
-                    const upperBound: UpperBoundType = { upper: messageFilter.idFilter.upperId, open: messageFilter.idFilter.lowerIdOpen };
+                    const upperBound: UpperBoundType = { upper: messageFilter.idFilter.upperId, open: messageFilter.idFilter.upperIdOpen };
                     this.zainDB.searchDatas<MessageTable>('Message-Table', 'id', RangeTypeEnum.UPPERBOUND, upperBound, (datas: MessageTable[]) => {
                         func(datas);
                     });

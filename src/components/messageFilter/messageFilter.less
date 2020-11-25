@@ -55,8 +55,14 @@
                 background: -webkit-linear-gradient(top, #dddddd, #555555);
             }
             .id-query-button {
+                position: relative;
                 width: calc(100% - 110px);
                 padding-left: 110px;
+                .query-prompt-text {
+                    position: absolute;
+                    left: 8px;
+                    font-size: 10px;
+                }
             }
             .id-query-cancel {
                 visibility: hidden;

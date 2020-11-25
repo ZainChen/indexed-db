@@ -23,6 +23,7 @@ export class Message extends Component<MessageProps, MessageState> {
             messageDatas: []
         }
         this.messageStore = manageStore.messageStore;
+        this.handleClearMessage = this.handleClearMessage.bind(this);
         this.handleAddMessage = this.handleAddMessage.bind(this);
         this.handleFilterReset = this.handleFilterReset.bind(this);
     }
@@ -49,6 +50,15 @@ export class Message extends Component<MessageProps, MessageState> {
     refreshMessageDatas(): void {
         this.messageStore.getMessageDatas((datas: MessageTable[]) => {
             this.setState({ messageDatas: datas });
+        });
+    }
+
+    /**
+     * 触发留言清空事件
+     */
+    handleClearMessage(): void {
+        this.messageStore.clearMessage((event: Event) => {
+            this.refreshMessageDatas();
         });
     }
 
@@ -103,6 +113,10 @@ export class Message extends Component<MessageProps, MessageState> {
             <div className="zain-message">
                 <div className="zain-message-head">
                     <div className="zain-message-title">【志银留言板】</div>
+                    <div
+                        className="zain-message-clear"
+                        onClick={this.handleClearMessage}
+                    >清空留言</div>
                     <div
                         className="zain-message-add"
                         onClick={this.handleAddMessage}

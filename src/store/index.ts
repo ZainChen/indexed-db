@@ -11,5 +11,4 @@ export class ManageStore {
 
     /** 留言板 store */
     public messageStore: MessageStore;
-    
 }
